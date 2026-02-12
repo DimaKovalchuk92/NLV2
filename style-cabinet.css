@@ -1,0 +1,623 @@
+/* Обнуление отступов */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 1. Определение вашего шрифта */
+@font-face {
+  font-family: 'Yeseva One'; /* Имя вашего шрифта */
+  src: url('yesevaone.ttf') format('truetype'); /* Путь к файлу шрифта */
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+    --sidebar-w: 280px;
+    --brand-blue: #3b82f6;
+}
+
+/*
+    Main layout variables:
+    - --sidebar-w: width of the left sidebar. Adjust to change sidebar size and content offset.
+    - --brand-blue: primary accent color used across the admin styles.
+*/
+
+body {
+    background-color: #f8fafc;
+    /* 2. Применение шрифта к страницам кабинетов */
+    font-family: 'Yeseva One', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    display: flex;
+}
+
+/* Боковая панель */
+.sidebar {
+    width: var(--sidebar-w);
+    height: 100vh;
+    background: white;
+    border-right: 1px solid #e2e8f0;
+    padding: 40px 24px;
+    position: fixed;
+    left: 0;
+    top: 0;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 48px;
+}
+
+.sidebar-link {
+    display: block;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 600;
+    margin-bottom: 8px;
+    transition: all 0.3s;
+}
+
+.sidebar-link.active, .sidebar-link:hover {
+    background: #eff6ff;
+    color: var(--brand-blue);
+}
+
+/* Основная область */
+.content-area {
+    margin-left: var(--sidebar-w);
+    /* use remaining width but don't constrain inner content with an auto-centering rule */
+    width: calc(100% - var(--sidebar-w));
+    max-width: 1100px;
+    padding:  20px; /* 20px от края сайдбара */
+    display: block;
+        /* Watermark sits behind the content; increase z-index of content to ensure readability. */
+}
+
+/* Шапка и Вкладки */
+.header-main {
+    margin-bottom: 48px;
+}
+
+.user-greeting {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.user-greeting h1 {
+    font-size: 36px;
+    font-weight: 900;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    background: var(--brand-blue);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+
+/* Навигация вкладок */
+.nav-tabs-container {
+    display: flex;
+    gap: 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.nav-tab {
+    padding: 12px 20px;
+    font-weight: 700;
+    color: #94a3b8;
+    cursor: pointer;
+    position: relative; /* ensure dropdown positions relative to the tab */
+}
+
+.nav-tab:hover {
+    color: var(--brand-blue);
+}
+
+/* Active tab visual */
+.nav-tab.active {
+    color: var(--brand-blue);
+    border-bottom: 3px solid var(--brand-blue);
+}
+
+/* Tab content panes */
+.tab-content .tab-pane { display: none; }
+.tab-content .tab-pane.active { display: block; }
+
+/* Выпадающее меню */
+.dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0; /* align dropdown to the left edge of the tab */
+    transform: translateY(10px);
+    width: 220px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
+    padding: 8px;
+    z-index: 100;
+}
+
+.nav-tab:hover .dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Prevent dropdown from overflowing left edge of content area */
+.dropdown { max-width: 90vw; }
+
+.dropdown-item {
+    padding: 10px 16px;
+    font-size: 14px;
+    border-radius: 8px;
+    color: #475569;
+}
+
+.dropdown-item:hover {
+    background: #f1f5f9;
+    color: var(--brand-blue);
+}
+
+/* Карточка задачи */
+.activity-card {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 8px 20px rgba(2,6,23,0.06);
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 110px;
+    transition: transform .28s ease, box-shadow .28s ease;
+}
+.activity-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 40px rgba(2,6,23,0.08);
+}
+
+/* Cabinet: make activity cards a 4-column layout for dashboard view */
+.task-section .activity-card {
+    display: grid;
+    grid-template-columns: 110px 1fr 1.4fr 160px; /* meta | title | description | actions */
+    gap: 18px;
+    align-items: center;
+    min-height: 88px;
+    padding: 18px 22px;
+}
+
+/* Make cards in the cabinet dashboard span the full content column so they appear wider
+   (this forces each card to take the whole grid width instead of occupying one of two columns) */
+.task-section > .grid > .activity-card,
+.task-section .activity-card { 
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: none;
+}
+.task-section .activity-card .card-col.meta { display:flex; flex-direction:column; align-items:flex-start; gap:6px; }
+.task-section .activity-card .card-col.title h3 { font-size: 18px; margin: 0; }
+.task-section .activity-card .card-col.desc p { margin: 0; }
+.task-section .activity-card .card-col.actions { text-align: right; }
+.task-section .activity-card .card-link { display:inline-block; color: var(--brand-blue); font-weight:700; }
+
+/* Badge styling (small) */
+.task-section .badge { background:#eef2ff; color:#1e40af; padding:6px 10px; border-radius:8px; font-size:12px; font-weight:800; }
+.task-section .date { color:#94a3b8; font-size:13px; }
+
+/* Status button + menu styles used in admin cases list */
+.status-wrap { position: relative; display: inline-block; z-index: 9999; }
+.status-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8fafc;
+    border: 1px solid #e6eef9;
+    color: #475569;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 10px;
+    box-shadow: 0 6px 14px rgba(2,6,23,0.04);
+}
+.status-btn strong { font-weight:700; color: #0f172a; }
+.status-menu {
+    /* absolute positioning inside .status-wrap keeps menu aligned to the button
+       and avoids complex inline positioning. Ensure parent .status-wrap has high z-index. */
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 18px 40px rgba(2,6,23,0.08);
+    min-width: 160px;
+    padding: 6px 0;
+    display: block; /* use opacity/visibility for hide/show to avoid reflow */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+    transition: opacity .18s ease, transform .18s ease, visibility .18s;
+    z-index: 9999;
+}
+.status-menu.open { opacity: 1; visibility: visible; transform: translateY(0); }
+.status-item { padding: 8px 14px; cursor: pointer; color: #475569; font-weight:600; display:block; }
+.status-item:hover { background: #f1f5f9; color: var(--brand-blue); }
+
+@media (max-width: 640px) {
+    .status-menu { left: 0; top: calc(100% + 6px); min-width: 140px; }
+}
+
+/* Floating portal styles (injected into body) for status menu - avoids clipping */
+#status-portal.status-portal {
+    position: fixed;
+    z-index: 99999;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 22px 48px rgba(2,6,23,0.12);
+    min-width: 160px;
+    padding: 6px 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+    transition: opacity .18s ease, transform .18s ease, visibility .18s;
+}
+#status-portal.status-portal.open { opacity: 1; visibility: visible; transform: translateY(0); }
+#status-portal .status-item { padding: 8px 14px; display:block; }
+
+@media (max-width: 800px) {
+    .task-section .activity-card { grid-template-columns: 90px 1fr; grid-template-rows: auto auto; }
+    .task-section .activity-card .card-col.desc { grid-column: 2 / span 1; }
+    .task-section .activity-card .card-col.actions { grid-column: 2 / span 1; text-align:left; margin-top:8px; }
+}
+
+/* Schedule item delete button styling */
+.activity-card .btn-delete {
+    background: #ef4444;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 20px rgba(239,68,68,0.12);
+    transition: transform .14s ease, box-shadow .14s ease, opacity .12s ease;
+}
+.activity-card .btn-delete:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(239,68,68,0.16); }
+.activity-card .btn-delete:active { transform: translateY(0); }
+
+/* Make sure delete button keeps to the right and vertically centered */
+.activity-card .btn-delete { min-width: 84px; }
+
+@media (max-width: 640px) {
+    .activity-card .btn-delete { min-width: 70px; padding: 6px 10px; font-size: 13px; }
+}
+
+/* Anchor delete button to the right of the card with 100px offset (schedule view) */
+#tab-schedule .activity-card { position: relative; padding-right: 140px; }
+#tab-schedule .activity-card .btn-delete {
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* on small screens keep normal flow */
+@media (max-width: 640px) {
+    #tab-schedule .activity-card { padding-right: 20px; }
+    #tab-schedule .activity-card .btn-delete { position: static; transform: none; right: auto; top: auto; }
+}
+
+./* Сетка кейсов — вертикальная колонка (вертикальное размещение карточек) */
+#cases-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    align-items: stretch;
+    /* keep the list left-aligned inside the content area so it hugs the sidebar */
+    max-width: 700px;
+    margin-left: 0;
+    margin-right: auto;
+    width: 50%;
+}
+
+.activity-card .left { flex: 1; }
+.activity-card .actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+.activity-card .actions button {
+    min-width: 100px;
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+/* Логотип как полупрозрачный фон на всех страницах кабинета */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("logo.jpg.jpeg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: auto 100vh;
+    opacity: 0.14;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Основные области поверх водяного знака */
+.content-area, .sidebar {
+    position: relative;
+    z-index: 1;
+}
+
+.badge {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+/* Анимация плавного перехода темы */
+body, .sidebar, .activity-card, .bg-white, .modal-window, .dropdown, .status-menu, #status-portal, input, select, button, .sidebar-link {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* --- Dark Theme Overrides --- */
+body.dark-theme {
+    background-color: #0f172a;
+    color: #f1f5f9;
+}
+body.dark-theme .sidebar,
+body.dark-theme .activity-card,
+body.dark-theme .bg-white,
+body.dark-theme .modal-window,
+body.dark-theme .dropdown,
+body.dark-theme .status-menu,
+body.dark-theme #status-portal {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+/* --- Hero Path Styles --- */
+.hero-path-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 40px 0;
+}
+.hero-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+    opacity: 0.4;
+    transition: all 0.3s ease;
+}
+.hero-step .step-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    border: 4px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+.hero-step .step-label { font-weight: 700; color: #64748b; }
+.hero-step-line { flex: 1; height: 4px; background-color: #e2e8f0; border-radius: 2px; max-width: 200px; }
+
+/* Active & Completed States */
+.hero-step.active { opacity: 1; }
+.hero-step.active .step-icon { background-color: #dbeafe; border-color: var(--brand-blue); transform: scale(1.1); }
+.hero-step.active .step-label { color: var(--brand-blue); }
+.hero-step.completed { opacity: 1; }
+.hero-step.completed .step-icon { background-color: #dcfce7; border-color: #22c55e; }
+.hero-step.completed .step-label { color: #166534; }
+body.dark-theme .text-slate-900 { color: #f1f5f9 !important; }
+body.dark-theme .text-slate-800 { color: #f1f5f9 !important; }
+body.dark-theme .text-slate-700 { color: #e2e8f0 !important; }
+body.dark-theme .text-slate-500 { color: #94a3b8 !important; }
+body.dark-theme .text-slate-600 { color: #cbd5e1 !important; }
+body.dark-theme .bg-slate-50 { background-color: #0f172a !important; border-color: #334155 !important; }
+body.dark-theme .bg-slate-100 { background-color: #334155 !important; color: #e2e8f0 !important; }
+body.dark-theme .sidebar-link { color: #94a3b8; }
+body.dark-theme .sidebar-link:hover, body.dark-theme .sidebar-link.active { background-color: #334155; color: #60a5fa; }
+body.dark-theme input, body.dark-theme select {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+/* --- Modal Dark Theme Fixes --- */
+body.dark-theme #settings-modal .bg-white,
+body.dark-theme #admin-settings-modal .bg-white {
+    background-color: #1e293b;
+    color: #f1f5f9;
+}
+/* Titles inside modal */
+body.dark-theme #settings-modal .section-title,
+body.dark-theme #settings-modal h3,
+body.dark-theme #admin-settings-modal .section-title,
+body.dark-theme #admin-settings-modal h3 {
+    color: #f1f5f9;
+}
+/* Inner panels in modal */
+body.dark-theme #settings-modal .border-slate-200,
+body.dark-theme #admin-settings-modal .border-slate-200 {
+    border-color: #334155;
+}
+/* Close button */
+body.dark-theme #settings-modal .bg-slate-100,
+body.dark-theme #admin-settings-modal .bg-slate-100 {
+    background-color: #334155;
+}
+/* Language selection labels */
+body.dark-theme #settings-modal label,
+body.dark-theme #admin-settings-modal label {
+    border-color: #334155;
+}
+body.dark-theme #settings-modal label:hover,
+body.dark-theme #admin-settings-modal label:hover {
+    background-color: #334155;
+}
+/* Danger zone */
+body.dark-theme #settings-modal .bg-red-50 {
+    background-color: rgba(153, 27, 27, 0.2);
+    border-color: rgba(153, 27, 27, 0.3);
+}
+body.dark-theme #settings-modal .text-red-800 { color: #fca5a5; }
+body.dark-theme #settings-modal .text-red-600 { color: #fca5a5; }
+
+/* --- Activity Hub Dark Theme Fixes --- */
+body.dark-theme .prose { color: #cbd5e1; }
+body.dark-theme .prose h3, body.dark-theme .prose h4, body.dark-theme .prose strong { color: #f1f5f9; }
+body.dark-theme .bg-blue-50 { background-color: rgba(59, 130, 246, 0.1); }
+body.dark-theme .text-blue-900 { color: #dbeafe; }
+body.dark-theme .text-blue-400 { color: #93c5fd; }
+body.dark-theme #hub-pane-chat { background-color: #0f172a; }
+body.dark-theme #hub-pane-chat .bg-white { background-color: #1e293b; }
+body.dark-theme .hub-tab-btn.active { background-color: #1e293b !important; color: #f1f5f9 !important; }
+body.dark-theme .hub-tab-btn:not(.active) { color: #94a3b8 !important; }
+body.dark-theme .hub-tab-btn:not(.active):hover { background-color: rgba(30, 41, 59, 0.5) !important; }
+body.dark-theme .prose ul > li span:first-child { color: #60a5fa !important; }
+
+/* --- Achievements Styles --- */
+.achievement-card {
+    background-color: #f1f5f9;
+    border: 2px solid #e2e8f0;
+    border-radius: 1.5rem;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    opacity: 0.5;
+    filter: grayscale(80%);
+    transition: all 0.3s ease;
+}
+.achievement-card.unlocked {
+    opacity: 1;
+    filter: grayscale(0%);
+    background-color: white;
+    box-shadow: 0 8px 20px rgba(2,6,23,0.06);
+}
+.achievement-card .ach-icon {
+    font-size: 40px;
+    flex-shrink: 0;
+}
+.achievement-card .ach-title {
+    font-weight: 800;
+    font-size: 18px;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+.achievement-card .ach-desc {
+    font-size: 14px;
+    color: #64748b;
+}
+body.dark-theme .achievement-card {
+    background-color: #1e293b;
+    border-color: #334155;
+}
+body.dark-theme .achievement-card.unlocked {
+    background-color: #334155;
+}
+body.dark-theme .achievement-card .ach-title { color: #f1f5f9; }
+body.dark-theme .achievement-card .ach-desc { color: #94a3b8; }
+
+/* --- Hero Path Timeline --- */
+.hero-step-card {
+    position: relative;
+    padding-left: 40px;
+    opacity: 0.5;
+    filter: grayscale(1);
+    transition: all 0.4s ease;
+}
+
+.hero-step-card .step-marker {
+    position: absolute;
+    left: -8px;
+    top: 0;
+    width: 24px;
+    height: 24px;
+    background: #cbd5e1;
+    border-radius: 9999px;
+    border: 4px solid white;
+    transition: all 0.4s ease;
+}
+
+.hero-step-card.completed .step-marker {
+    background: #22c55e;
+}
+
+.hero-step-card.active, .hero-step-card.completed {
+    opacity: 1;
+    filter: grayscale(0);
+}
+
+.hero-step-card.active .step-marker {
+    background: #3b82f6;
+    transform: scale(1.2);
+    animation: pulse-marker 2s infinite;
+}
+
+.hero-step-card .card-inner {
+    background: white;
+    border-radius: 1.5rem;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    transition: all 0.4s ease;
+}
+
+.hero-step-card.active .card-inner {
+    border-color: #93c5fd;
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
+}
+
+@keyframes pulse-marker {
+    0% { box-shadow: 0 0 0 0px rgba(59, 130, 246, 0.4); }
+    70% { box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); }
+    100% { box-shadow: 0 0 0 0px rgba(59, 130, 246, 0); }
+}
+
+/* Dark theme adjustments */
+body.dark-theme .hero-step-card .step-marker { border-color: #1e293b; }
+body.dark-theme .hero-step-card .card-inner { background: #1e293b; border-color: #334155; }
+body.dark-theme .hero-step-card.active .card-inner { border-color: #3b82f6; }
+
+/* --- Scroll Animation --- */
+.scroll-animate {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+.scroll-animate.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}

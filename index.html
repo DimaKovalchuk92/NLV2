@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Life Vision | Платформа устойчивых изменений</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="style.css">
+        <!--
+            Notes:
+            - Shared styles live in `style.css` (logo watermark, format-card gradient).
+            - For quick tuning, change variables in `:root` at top of `style.css`.
+        -->
+    <style>
+        :root { --brand-grad: linear-gradient(to right, #3b82f6, #10b981, #facc15); }
+
+        /* Анимация кнопок */
+        .btn-grow {
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 50;
+        }
+        .btn-grow:hover { transform: scale(1.05); }
+
+        /* .format-card rules moved to style.css to avoid conflicts with utility classes */
+
+        /* Анимация заземления */
+        @keyframes breathe {
+            0%, 100% { transform: scale(0.8); opacity: 0.4; }
+            40%, 60% { transform: scale(1.4); opacity: 1; }
+        }
+        @keyframes textCycle {
+            0%, 100% { content: "Выдох..."; color: #64748b; }
+            5%, 35% { content: "Вдох..."; color: #3b82f6; }
+            40%, 65% { content: "Задержите..."; color: #10b981; }
+        }
+        .breath-hint::after { content: "Дышите..."; animation: textCycle 8s infinite; }
+        .breath-circle {
+            width: 200px; height: 200px; border-radius: 50%;
+            background: radial-gradient(circle, #3b82f6 0%, #93c5fd 100%);
+            animation: breathe 8s infinite ease-in-out;
+            box-shadow: 0 0 60px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Плавное появление/скрытие модального окна авторизации */
+        .auth-modal {
+            display: flex; /* сохраняем flex-расположение */
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity .28s ease, visibility .28s ease;
+        }
+        .auth-modal .modal-window {
+            transform: translateY(12px) scale(.98);
+            transition: transform .32s cubic-bezier(.2,.9,.2,1), opacity .28s ease;
+            opacity: 0;
+        }
+        .auth-modal.open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .auth-modal.open .modal-window {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans min-h-screen overflow-x-hidden">
+
+    <nav class="flex justify-between items-center p-8 max-w-7xl mx-auto">
+        <div class="text-2xl font-black italic tracking-tighter">
+            NEW LIFE <span class="text-blue-600">VISION</span>
+        </div>
+        <button class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold btn-grow shadow-lg">Начать работу</button>
+    </nav>
+    
+
+    <header class="max-w-7xl mx-auto px-6 py-24 text-center">
+        <h1 class="text-7xl font-black mb-8 leading-tight tracking-tight">New Life Vision</h1>
+        <p class="text-xl text-slate-500 max-w-2xl mx-auto mb-12">
+            Операционная система для онлайн-практики специалистов помогающих профессий. Безопасность, структура и прогресс.
+        </p>
+        
+        <div id="auth-buttons" class="flex flex-col md:flex-row justify-center gap-6 relative z-10">
+            <button onclick="openAuth('client')" class="btn-grow bg-white border border-slate-200 px-10 py-5 rounded-2xl shadow-sm font-bold text-lg text-slate-900">
+                🔍 Найти специалиста
+            </button>
+            <button onclick="openAuth('admin')" class="btn-grow bg-slate-900 text-white px-10 py-5 rounded-2xl shadow-xl font-bold text-lg">
+                🚀 Я профи
+            </button>
+        </div>
+    </header>
+
+    <section class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-10 pb-32">
+        <div class="format-card p-10 border border-slate-100">
+            <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-4xl mb-8">👤</div>
+            <h3 class="text-2xl font-bold mb-4">Индивидуальные</h3>
+            <p class="text-slate-500 text-lg">Работа 1:1 с полной историей сессий и защищенным чатом.</p>
+        </div>
+        <div class="format-card p-10 border border-slate-100">
+            <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-4xl mb-8">👥</div>
+            <h3 class="text-2xl font-bold mb-4">Групповая терапия</h3>
+            <p class="text-slate-500 text-lg">Разделение общего контекста группы и личного пространства.</p>
+        </div>
+        <div class="format-card p-10 border border-slate-100">
+            <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-4xl mb-8">🏆</div>
+            <h3 class="text-2xl font-bold mb-4">Марафоны</h3>
+            <p class="text-slate-500 text-lg">Программы с геймификацией прогресса через Путь героя.</p>
+        </div>
+    </section>
+
+    <button onclick="document.getElementById('g').style.display='flex'" class="fixed bottom-10 right-10 bg-red-500 text-white w-20 h-20 rounded-full shadow-2xl flex items-center justify-center text-4xl z-50 hover:scale-110 transition-transform">🧘‍♂️</button>
+
+    <div id="g" style="display:none;" class="fixed inset-0 bg-white/98 backdrop-blur-2xl z-[100] flex-col items-center justify-center text-center">
+        <h2 class="breath-hint text-5xl font-black mb-16 h-16"></h2>
+        <div class="breath-circle mb-16 mx-auto"></div>
+        <button onclick="document.getElementById('g').style.display='none'" class="btn-grow bg-slate-100 text-slate-500 px-10 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:text-red-500">Завершить</button>
+    </div>
+
+    <div id="auth-modal" class="auth-modal fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[150] items-center justify-center p-4" aria-hidden="true">
+        <div class="modal-window bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl">
+            <h2 id="modal-title" class="text-3xl font-black mb-2">Вход</h2>
+            <p id="modal-desc" class="text-slate-500 mb-8 text-sm italic">Авторизация в New Life Vision</p>
+            
+            <div class="space-y-4 text-left">
+                <input type="text" id="name" class="hidden w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Ваше имя">
+                <input type="text" id="email" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Логин">
+                <input type="password" id="password" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Пароль">
+            </div>
+
+            <div class="mt-8 flex gap-4">
+                <button onclick="closeAuth()" class="flex-1 py-4 font-bold text-slate-400">Отмена</button>
+                <button onclick="handleLogin()" id="login-btn" class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg">Войти</button>
+                <button onclick="handleRegister()" id="register-btn" class="hidden flex-1 bg-green-600 text-white py-4 rounded-2xl font-bold shadow-lg">Регистрация</button>
+            </div>
+            <div class="mt-4 text-center">
+                <a href="#" onclick="toggleAuthMode(event)" id="auth-mode-toggle" class="text-sm font-bold text-blue-600 hover:underline">Нет аккаунта? Зарегистрироваться</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="modules/mock-api.js"></script>
+    <script>
+        let currentRole = '';
+        let isRegisterMode = false;
+
+        // Проверка существующей сессии
+        function checkAuth() {
+            const user = MockAPI.getLoggedInUser();
+            const authButtons = document.getElementById('auth-buttons');
+            
+            if (user && authButtons) {
+                const targetPage = user.role === 'admin' ? 'admin.html' : 'cabinet.html';
+                authButtons.innerHTML = `
+                    <div class="flex flex-col items-center gap-4">
+                        <a href="${targetPage}" class="btn-grow bg-blue-600 text-white px-10 py-5 rounded-2xl shadow-xl font-bold text-lg no-underline">
+                            Вернуться в кабинет →
+                        </a>
+                        <button onclick="logout()" class="text-slate-400 font-bold hover:text-red-500 transition">Выйти из системы</button>
+                    </div>
+                `;
+            }
+        }
+
+        function openAuth(role) {
+            currentRole = role;
+            isRegisterMode = false; // Always start in login mode
+            
+                const modal = document.getElementById('auth-modal');
+                const title = document.getElementById('modal-title');
+                const nameInput = document.getElementById('name');
+                const emailInput = document.getElementById('email');
+                const loginBtn = document.getElementById('login-btn');
+                const registerBtn = document.getElementById('register-btn');
+                const toggleLink = document.getElementById('auth-mode-toggle');
+            
+                // Reset to login view
+                title.innerText = role === 'admin' ? "Вход для ПРОФИ" : "Вход для КЛИЕНТА";
+                title.style.color = role === 'admin' ? "#0f172a" : "#2563eb";
+                nameInput.classList.add('hidden');
+                emailInput.placeholder = 'Логин';
+                emailInput.disabled = false;
+                emailInput.value = '';
+                document.getElementById('password').value = '';
+                loginBtn.classList.remove('hidden');
+                registerBtn.classList.add('hidden');
+                toggleLink.innerText = 'Нет аккаунта? Зарегистрироваться';
+
+                modal.classList.add('open');
+                modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeAuth() {
+                const modal = document.getElementById('auth-modal');
+                modal.classList.remove('open');
+                modal.setAttribute('aria-hidden', 'true');
+        }
+
+        function handleLogin() {
+            const username = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value.trim();
+
+            const user = MockAPI.loginUser(username, pass);
+
+            if (user) {
+                if (user.role !== currentRole) {
+                    alert(`Пожалуйста, используйте вход для ${user.role === 'admin' ? 'ПРОФИ' : 'КЛИЕНТА'}.`);
+                    return;
+                }
+                const targetPage = user.role === 'admin' ? 'admin.html' : 'cabinet.html';
+                window.location.href = targetPage;
+            } else {
+                alert("Ошибка! Неверный логин или пароль.");
+            }
+        }
+
+        function handleRegister() {
+            const name = document.getElementById('name').value.trim();
+            const username = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value.trim();
+
+            if (!name || !username || !pass) {
+                alert('Пожалуйста, заполните имя, логин и пароль.');
+                return;
+            }
+
+            const newUser = MockAPI.registerUser(currentRole, name, username, pass);
+
+            if (!newUser) {
+                alert('Этот логин уже занят. Пожалуйста, выберите другой.');
+                return;
+            }
+
+            const loggedInUser = MockAPI.loginUser(newUser.id, newUser.pass);
+
+            if (loggedInUser) {
+                alert(`Регистрация успешна! Ваш логин для входа: ${loggedInUser.id}`);
+                const targetPage = loggedInUser.role === 'admin' ? 'admin.html' : 'cabinet.html';
+                window.location.href = targetPage;
+            } else {
+                // Эта ошибка не должна происходить, если регистрация прошла успешно, но оставим на всякий случай
+                alert('Произошла ошибка при входе после регистрации.');
+            }
+        }
+
+        function toggleAuthMode(event) {
+            event.preventDefault();
+            isRegisterMode = !isRegisterMode;
+
+            const modalTitle = document.getElementById('modal-title');
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const loginBtn = document.getElementById('login-btn');
+            const registerBtn = document.getElementById('register-btn');
+            const toggleLink = document.getElementById('auth-mode-toggle');
+
+            if (isRegisterMode) {
+                modalTitle.innerText = currentRole === 'admin' ? "Регистрация ПРОФИ" : "Регистрация КЛИЕНТА";
+                nameInput.classList.remove('hidden');
+                emailInput.placeholder = 'Придумайте логин';
+                emailInput.disabled = false;
+                loginBtn.classList.add('hidden');
+                registerBtn.classList.remove('hidden');
+                toggleLink.innerText = 'Уже есть аккаунт? Войти';
+            } else {
+                modalTitle.innerText = currentRole === 'admin' ? "Вход для ПРОФИ" : "Вход для КЛИЕНТА";
+                nameInput.classList.add('hidden');
+                emailInput.placeholder = 'Логин';
+                emailInput.disabled = false;
+                loginBtn.classList.remove('hidden');
+                registerBtn.classList.add('hidden');
+                toggleLink.innerText = 'Нет аккаунта? Зарегистрироваться';
+            }
+        }
+
+        function logout() {
+            MockAPI.logoutUser();
+            window.location.reload();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            MockAPI.init();
+            checkAuth();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет | Platform OS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style-cabinet.css">
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans flex min-h-screen">
+
+    <aside class="sidebar fixed h-screen z-50 flex flex-col">
+    <div class="logo font-black italic tracking-tighter">
+        NEW LIFE <span class="text-blue-600">VISION</span>
+    </div>
+    <nav class="mt-12 space-y-4 flex-1">
+        <a href="#" onclick="showView('task-section'); return false;" class="sidebar-link active" id="nav-dashboard">📊 <span data-translate-key="nav_dashboard">Мой Дашборд</span></a>
+        <a href="index.html" class="sidebar-link">🏠 <span data-translate-key="nav_home">На главную</span></a>
+        <a href="#" onclick="openSettingsModal(); return false;" class="sidebar-link" id="nav-settings">⚙️ <span data-translate-key="nav_settings">Настройки страницы</span></a>
+    </nav>
+    
+    <div class="border-t border-slate-100 pt-6">
+        <button onclick="logout()" class="sidebar-link text-red-500 w-full text-left hover:bg-red-50 hover:text-red-600">
+            🚪 <span data-translate-key="logout">Выйти из аккаунта</span>
+        </button>
+        <div class="user-id uppercase tracking-widest text-[10px] mt-4 text-slate-400">ID: 4412</div>
+    </div>
+</aside>
+
+    <main class="content-area">
+        <header class="header-main">
+            <div class="user-greeting">
+                <h1><span data-translate-key="welcome_greeting">Добро пожаловать,</span> <span id="user-name-display" class="text-blue-600">Александр</span></h1>
+                <div class="avatar shadow-lg">А</div>
+            </div>
+
+            <nav class="nav-tabs-container">
+                <div class="nav-tab">
+                    Activity
+                    <div class="dropdown">
+                        <div class="dropdown-item">История сессий</div>
+                        <div class="dropdown-item">Статистика</div>
+                    </div>
+                </div>
+
+                <div class="nav-tab">
+                    Activity Hub
+                    <div class="dropdown">
+                        <div class="dropdown-item" data-translate-key="hub_current_session">Текущая сессия</div>
+                        <div class="dropdown-item" data-translate-key="hub_tasks">Задания</div>
+                        <div id="nav-chat-link" class="dropdown-item flex justify-between items-center cursor-pointer" onclick="openActivityHub()"><span data-translate-key="hub_chat">Чат</span></div>
+                    </div>
+                </div>
+
+                <div class="nav-tab cursor-pointer" onclick="openHeroPath()" data-translate-key="hero_path_main_tab">Путь героя</div>
+
+                <div class="nav-tab">
+                    Приватность
+                    <div class="dropdown">
+                        <div class="dropdown-item">Доступы</div>
+                        <div class="dropdown-item">Шифрование</div>
+                    </div>
+                </div>
+
+                <div class="nav-tab">
+                    Marketplace
+                    <div class="dropdown">
+                        <div class="dropdown-item" data-translate-key="marketplace_workshops">Найти воркшоп</div>
+                        <div class="dropdown-item" data-translate-key="marketplace_materials">Материалы</div>
+                        <div class="dropdown-item cursor-pointer" onclick="openSpecialists()" data-translate-key="marketplace_specialists">Специалисты</div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <section id="task-section" class="task-section">
+            <h2 class="section-title" data-translate-key="active_tasks_title">Ваши активные задачи:</h2>
+            <div id="dashboard-tasks" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="activity-card">
+                    <div class="card-col meta">
+                        <div class="badge badge-blue">CORE<br>SESSION</div>
+                        <div class="date mt-2">Сегодня, 18:00</div>
+                    </div>
+                    <div class="card-col title">
+                        <h3 class="mb-0">Личные границы</h3>
+                    </div>
+                    <div class="card-col desc">
+                        <p class="mb-0 text-slate-500">В этом хабе будет саммари встречи, чат и домашнее задание.</p>
+                    </div>
+                    <div class="card-col actions">
+                        <div class="card-link">Войти в Activity Hub <span>→</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Секция Путь Героя -->
+        <section id="hero-path-view" class="hidden">
+            <h2 class="section-title mb-8" data-translate-key="hero_path_title">Путь героя</h2>
+            <div class="hero-map-wrapper relative pl-8 py-10 max-w-3xl mx-auto">
+                <div class="absolute left-8 top-0 bottom-0 w-1 bg-slate-100 dark:bg-slate-700 rounded-full transform -translate-x-1/2"></div>
+                <div id="hero-progress-line" class="absolute left-8 top-0 w-1 bg-gradient-to-b from-blue-500 via-green-400 to-yellow-400 rounded-full transform -translate-x-1/2 transition-all duration-1000 ease-out" style="height: 0%"></div>
+                <div id="hero-steps-container" class="space-y-12 relative z-10"></div>
+            </div>
+        </section>
+
+        <!-- Секция Специалистов -->
+        <section id="specialists-view" class="hidden">
+            <h2 class="section-title mb-8" data-translate-key="specialists_title">Наши специалисты</h2>
+            <div id="specialists-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Список специалистов будет здесь -->
+            </div>
+        </section>
+
+        <!-- Секция Activity Hub (Чат) - скрыта по умолчанию -->
+        <section id="activity-hub-view" class="hidden flex flex-col h-[calc(100vh-240px)] min-h-[500px]">
+            <div class="mb-6 flex items-center gap-4">
+                <button onclick="closeActivityHub()" class="text-slate-500 hover:text-blue-600 font-bold flex items-center gap-2 transition-colors">
+                    <span>←</span> <span data-translate-key="chat_back_to_tasks">Назад к задачам</span>
+                </button>
+                <h2 class="text-2xl font-bold" data-translate-key="chat_title">Activity Hub: Чат со специалистом</h2>
+            </div>
+            <div class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden flex flex-col flex-1">
+                <div id="chat-history" class="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/50">
+                    <!-- Сообщения будут загружены сюда через JS -->
+                </div>
+                <div class="p-4 bg-white border-t border-slate-100 flex gap-3 items-center">
+                    <input type="text" id="chat-input" class="flex-1 px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:border-blue-500 outline-none font-medium transition-all" placeholder="Напишите сообщение..." onkeydown="if(event.key==='Enter') sendChatMessage()" data-translate-key="chat_placeholder">
+                    <button onclick="sendChatMessage()" class="bg-blue-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center hover:bg-blue-700 transition shadow-lg shadow-blue-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 ml-1">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    <!-- cabinet scripts: MockAPI used for local dev; replace or remove when wiring real backend -->
+    <script src="config.js"></script>
+    <script src="modules/mock-api.js"></script>
+    <script src="cabinet.js"></script>
+    
+    <!-- Notification Sound -->
+    <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+    <!-- Модальное окно Настроек -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[200] hidden items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeSettingsModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:text-red-500 transition">✕</button>
+            
+            <h2 class="section-title mb-8" data-translate-key="settings_title">Настройки страницы</h2>
+            
+            <div class="p-8 rounded-3xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold mb-6" data-translate-key="settings_appearance">Внешний вид</h3>
+                <div class="flex gap-4">
+                    <button id="theme-btn-light" onclick="setTheme('light')" class="flex-1 py-4 border-2 border-slate-100 rounded-2xl font-bold hover:border-blue-500 focus:border-blue-600 transition flex flex-col items-center gap-2">
+                        <span class="text-2xl">☀️</span> <span data-translate-key="settings_theme_light">Светлая</span>
+                    </button>
+                    <button id="theme-btn-dark" onclick="setTheme('dark')" class="flex-1 py-4 border-2 border-slate-100 rounded-2xl font-bold hover:border-blue-500 focus:border-blue-600 transition flex flex-col items-center gap-2">
+                        <span class="text-2xl">🌙</span> <span data-translate-key="settings_theme_dark">Темная</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <h3 class="text-xl font-bold mb-6" data-translate-key="settings_language">Язык интерфейса</h3>
+                <div class="space-y-4">
+                    <label class="flex items-center gap-4 p-4 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                        <input type="radio" name="lang" value="ru" onchange="setLanguage('ru')" checked class="w-5 h-5 text-blue-600">
+                        <span class="font-bold" data-translate-key="lang_ru">Русский</span>
+                    </label>
+                    <label class="flex items-center gap-4 p-4 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                        <input type="radio" name="lang" value="ua" onchange="setLanguage('ua')" class="w-5 h-5 text-blue-600">
+                        <span class="font-bold" data-translate-key="lang_ua">Українська</span>
+                    </label>
+                    <label class="flex items-center gap-4 p-4 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                        <input type="radio" name="lang" value="en" onchange="setLanguage('en')" class="w-5 h-5 text-blue-600">
+                        <span class="font-bold" data-translate-key="lang_en">English</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="mt-8 bg-red-50 p-8 rounded-3xl border border-red-200">
+                <h3 class="text-xl font-bold mb-2 text-red-800" data-translate-key="settings_delete_account_title">Удаление аккаунта</h3>
+                <p class="text-red-600 mb-6" data-translate-key="settings_delete_account_desc">Это действие необратимо. Все ваши данные будут удалены.</p>
+                <button onclick="requestAccountDeletion()" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-red-700 transition" data-translate-key="settings_delete_account_btn">Удалить аккаунт</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

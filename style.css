@@ -1,0 +1,169 @@
+/* 1. Определение вашего шрифта */
+@font-face {
+  font-family: 'Yeseva One'; /* Имя вашего шрифта */
+  src: url('yesevaone.ttf') format('truetype'); /* Путь к файлу шрифта */
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 2. Применение шрифта к главной странице (index.html) */
+body.font-sans { font-family: 'Yeseva One', sans-serif; }
+
+/* Переменные для удобства */
+:root {
+    --brand-grad: linear-gradient(135deg, #3b82f6, #10b981, #facc15);
+}
+
+/*
+    Style notes:
+    - `--brand-grad` is used for animated borders and accents.
+    - Tweak `--brand-grad` to change gradient colors across format cards.
+*/
+
+/* Фон страницы */
+.grounding-bg {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, #eff6ff 0%, #ffffff 100%);
+    z-index: 0;
+}
+
+/* Карточки форматов */
+.format-card {
+    --border-width: 6px;
+    --card-radius: 2rem;
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+    border-radius: var(--card-radius);
+    transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+    background: transparent;
+}
+
+/* animated gradient as an outer layer; inner white mask covers center */
+.format-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--card-radius);
+    background: conic-gradient(from var(--g-rot, 0deg), #3b82f6, #10b981, #facc15, #3b82f6);
+    z-index: 0;
+    animation: spin-grad 8s linear infinite;
+}
+.format-card::after {
+    content: "";
+    position: absolute;
+    inset: var(--border-width);
+    border-radius: calc(var(--card-radius) - var(--border-width));
+    background: white;
+    z-index: 1;
+}
+
+/* ensure card content sits above the mask */
+.format-card > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* spin-grad is defined earlier to animate the --g-rot custom property */
+
+/* Подсветка ПЕРИМЕТРА КАРТОЧКИ при наведении */
+.format-card:hover {
+    transform: scale(1.05) translateY(-4px);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.06);
+}
+
+/* Контейнер иконки */
+.icon-box {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.25rem;
+    font-size: 2rem;
+    background-color: #f8fafc; /* Светлый фон по умолчанию */
+    transition: all 0.4s ease;
+    border: 2px solid transparent; /* Заготовка под рамку */
+    position: relative;
+}
+
+/* Эффект для ИКОНКИ при наведении на карточку: ТОЛЬКО ПЕРИМЕТР И УВЕЛИЧЕНИЕ */
+.format-card:hover .icon-box {
+    transform: scale(1.2) rotate(5deg);
+    /* Магия: градиент только на границе */
+    background-image: linear-gradient(#f8fafc, #f8fafc), var(--brand-grad);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
+/* Специальные стили для темной карточки */
+.format-card.dark {
+    background-color: #0f172a;
+    color: white;
+}
+
+.format-card.dark:hover {
+    background-image: linear-gradient(#0f172a, #0f172a), var(--brand-grad);
+}
+
+.format-card.dark .icon-box {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.format-card.dark:hover .icon-box {
+    background-image: linear-gradient(#1e293b, #1e293b), var(--brand-grad);
+}
+
+/* Анимация заземления */
+.animate-breathe {
+    animation: breathe 6s infinite ease-in-out;
+}
+
+@keyframes breathe {
+    0%, 100% { transform: scale(0.8); opacity: 0.4; } /* Выдох - точка минимума */
+    37% { transform: scale(1.4); opacity: 1; }      /* Вдох - точка максимума (3 сек) */
+    62% { transform: scale(1.4); opacity: 1; }      /* Задержка (2 сек) */
+}
+
+@property --g-rot {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+}
+@keyframes spin-grad { to { --g-rot: 360deg; } }
+
+.breath-circle {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, #3b82f6 0%, #93c5fd 100%);
+    border-radius: 50%;
+    animation: breathe 8s infinite ease-in-out; /* Ровно 8 секунд */
+    box-shadow: 0 0 60px rgba(59, 130, 246, 0.3);
+}
+
+/* Логотип как полупрозрачный фон на всех страницах */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("logo.jpg.jpeg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: auto 100vh;
+    opacity: 0.14;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/*
+    Watermark notes:
+    - `background-size: auto 100vh` stretches the logo to viewport height.
+    - Change `opacity` here to make watermark more/less visible across all pages.
+*/
+
+/* Поместить основной контент над водяным знаком */
+body > * {
+    position: relative;
+    z-index: 1;
+}
