@@ -20,7 +20,7 @@
   ],
   "mcp": {
     "github": false,
-    "filesystem": false,
+    "filesystem": true,
     "postgres": false
   }
 }
