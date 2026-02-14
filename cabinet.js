@@ -511,6 +511,28 @@ function unlockAudio() {
 document.addEventListener('click', unlockAudio);
 document.addEventListener('keydown', unlockAudio);
 
+function openSettingsModal() {
+    const modal = document.getElementById('settings-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        // Убедимся, что UI настроек отражает текущие значения
+        const savedTheme = localStorage.getItem('appTheme') || 'light';
+        setTheme(savedTheme); // Используем существующую функцию для установки UI
+        
+        const savedLang = localStorage.getItem('appLang') || 'ru';
+        setLanguageUI(savedLang); // Используем существующую функцию для установки UI
+    }
+}
+
+function closeSettingsModal() {
+    const modal = document.getElementById('settings-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
 window.addEventListener('storage', (e) => {
     if (e.key === 'nlv_mock_v1') {
         // If chat is open, update read time immediately

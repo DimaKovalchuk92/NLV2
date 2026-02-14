@@ -359,11 +359,6 @@
             document.getElementById('profile-display-spec').textContent = (user.profile.specializations && user.profile.specializations.join(', ')) || '...';
             document.getElementById('profile-display-bio').textContent = user.profile.bio || '...';
             document.getElementById('profile-display-welcome').textContent = user.profile.welcomeMessage || '...';
-
-            // Per request: confirm welcome message loading
-            if (user.profile.welcomeMessage) {
-                console.log('Подтверждение: Приветственное сообщение успешно загружено ->', `"${user.profile.welcomeMessage}"`);
-            }
         }
 
         // --- Status Portal Logic ---
