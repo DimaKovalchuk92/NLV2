@@ -70,7 +70,7 @@
         getAchievements() { return read().achievements ? read().achievements.slice() : []; },
         getSpecialists() { return read().users.filter(u => u.role === 'admin'); },
 
-        registerUser(role, name, username, pass) {
+        registerUser(role, name, username, pass, profileData) {
             const d = read();
 
             // Проверяем, занят ли логин
@@ -80,6 +80,12 @@
             }
 
             const newUser = { id: username, name: name, role: role, pass: pass };
+
+            // For specialists ('admin'), attach the profile object passed from the form.
+            if (role === 'admin' && profileData) {
+                newUser.profile = profileData;
+            }
+
             d.users.push(newUser);
             write(d);
             return newUser;

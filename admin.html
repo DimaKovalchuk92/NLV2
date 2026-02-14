@@ -30,10 +30,13 @@
 
     <main class="content-area">
         <header class="header-main">
-            <div class="user-greeting">
-                <h1><span data-translate-key="header_title">Панель</span> <span class="text-blue-600" data-translate-key="header_title_span">Специалиста</span></h1>
-                <div class="avatar shadow-lg bg-slate-900">Admin</div>
-            </div>
+             <div class="user-greeting">
+                <div>
+                    <h1 id="specialist-name" class="text-3xl font-bold">Панель Специалиста</h1>
+                    <p id="specialist-spec" class="text-slate-500 font-medium"></p>
+                </div>
+                <div id="specialist-avatar" class="avatar shadow-lg bg-slate-900">A</div>
+             </div>
         </header>
 
         <!-- Верхние вкладки согласно structure.json -->
@@ -145,6 +148,11 @@
                 settings_delete_account_desc: 'Это действие необратимо. Все ваши данные будут удалены.',
                 settings_delete_account_btn: 'Удалить аккаунт',
                 settings_delete_account_confirm: 'Вы уверены, что хотите удалить свой аккаунт? Это действие необратимо.',
+                settings_profile_title: 'Мой профиль',
+                settings_profile_name: 'Полное имя',
+                settings_profile_spec: 'Специализация',
+                settings_profile_bio: 'Биография',
+                settings_profile_welcome: 'Приветственное сообщение'
             },
             ua: {
                 nav_clients: 'Мої клієнти',
@@ -196,6 +204,11 @@
                 settings_delete_account_desc: 'Ця дія є незворотною. Всі ваші дані буде видалено.',
                 settings_delete_account_btn: 'Видалити акаунт',
                 settings_delete_account_confirm: 'Ви впевнені, що хочете видалити свій акаунт? Ця дія є незворотною.',
+                settings_profile_title: 'Мій профіль',
+                settings_profile_name: 'Повне ім\'я',
+                settings_profile_spec: 'Спеціалізація',
+                settings_profile_bio: 'Біографія',
+                settings_profile_welcome: 'Вітальне повідомлення'
             },
             en: {
                 nav_clients: 'My Clients',
@@ -247,6 +260,11 @@
                 settings_delete_account_desc: 'This action is irreversible. All your data will be deleted.',
                 settings_delete_account_btn: 'Delete Account',
                 settings_delete_account_confirm: 'Are you sure you want to delete your account? This action is irreversible.',
+                settings_profile_title: 'My Profile',
+                settings_profile_name: 'Full Name',
+                settings_profile_spec: 'Specialization',
+                settings_profile_bio: 'Biography',
+                settings_profile_welcome: 'Welcome Message'
             }
         };
 
@@ -318,6 +336,29 @@
             `).join('');
 
             attachStatusHandlers();
+        }
+
+        /**
+         * E02: Workspace Personalization
+         * Loads specialist profile data (name, specialization) into the header and settings modal.
+         */
+        function loadSpecialistProfile() {
+            const user = MockAPI.getLoggedInUser();
+            if (!user || !user.profile) {
+                console.warn("Specialist profile data not found. UI will not be personalized.");
+                return;
+            }
+
+            // --- Header Personalization ---
+            document.getElementById('specialist-name').textContent = user.profile.fullName || 'Специалист';
+            document.getElementById('specialist-spec').textContent = (user.profile.specializations && user.profile.specializations[0]) || '';
+            document.getElementById('specialist-avatar').textContent = (user.profile.fullName && user.profile.fullName.charAt(0).toUpperCase()) || 'S';
+
+            // --- Settings Modal Personalization ---
+            document.getElementById('profile-display-name').textContent = user.profile.fullName || '...';
+            document.getElementById('profile-display-spec').textContent = (user.profile.specializations && user.profile.specializations.join(', ')) || '...';
+            document.getElementById('profile-display-bio').textContent = user.profile.bio || '...';
+            document.getElementById('profile-display-welcome').textContent = user.profile.welcomeMessage || '...';
         }
 
         // --- Status Portal Logic ---
@@ -641,8 +682,10 @@
         function openAdminSettingsModal() {
             const modal = document.getElementById('admin-settings-modal');
             if (modal) {
+                loadSpecialistProfile(); // Load fresh data before showing
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
+                applyTranslations(); // Ensure new labels are translated
             }
         }
 
@@ -729,6 +772,7 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => {
+            loadSpecialistProfile();
             renderCases();
             
             // Делегирование событий для списка кейсов (вместо inline onclick)
@@ -846,6 +890,29 @@
             
             <h2 class="section-title mb-6" data-translate-key="settings_title">Настройки страницы</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- My Profile Section -->
+                <div class="p-8 rounded-3xl border border-slate-200 shadow-sm md:col-span-2">
+                    <h3 class="text-xl font-bold mb-6" data-translate-key="settings_profile_title">Мой профиль</h3>
+                    <div class="space-y-4 text-sm">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider" data-translate-key="settings_profile_name">Полное имя</label>
+                            <p id="profile-display-name" class="font-medium text-slate-700 mt-1 text-base"></p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider" data-translate-key="settings_profile_spec">Специализация</label>
+                            <p id="profile-display-spec" class="font-medium text-slate-700 mt-1 text-base"></p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider" data-translate-key="settings_profile_bio">Биография</label>
+                            <p id="profile-display-bio" class="font-medium text-slate-700 mt-1 text-base whitespace-pre-wrap"></p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider" data-translate-key="settings_profile_welcome">Приветственное сообщение</label>
+                            <p id="profile-display-welcome" class="font-medium text-slate-700 mt-1 text-base whitespace-pre-wrap"></p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="p-8 rounded-3xl border border-slate-200 shadow-sm">
                     <h3 class="text-xl font-bold mb-6" data-translate-key="settings_appearance">Внешний вид</h3>
                     <div class="flex gap-4">
@@ -874,6 +941,13 @@
                             <span class="font-bold" data-translate-key="lang_en">English</span>
                         </label>
                     </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="mt-8 bg-red-50 p-8 rounded-3xl border border-red-200">
+                    <h3 class="text-xl font-bold mb-2 text-red-800" data-translate-key="settings_delete_account_title">Удаление аккаунта</h3>
+                    <p class="text-red-600 mb-6" data-translate-key="settings_delete_account_desc">Это действие необратимо. Все ваши данные будут удалены.</p>
+                    <button onclick="requestAccountDeletion()" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-red-700 transition" data-translate-key="settings_delete_account_btn">Удалить аккаунт</button>
                 </div>
             </div>
         </div>

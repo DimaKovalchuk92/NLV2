@@ -133,6 +133,21 @@
                 <input type="text" id="name" class="hidden w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Ваше имя">
                 <input type="text" id="email" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Логин">
                 <input type="password" id="password" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Пароль">
+                <!-- Поля только для регистрации специалиста -->
+                <div id="specialist-fields" class="hidden space-y-4 pt-4 border-t border-slate-200 mt-4">
+                    <div>
+                        <label for="specialization" class="block text-sm font-bold text-slate-500 mb-2">Ваша спеціалізація (напр. Психолог, Коуч)</label>
+                        <input type="text" id="specialization" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Вкажіть напрямок роботи">
+                    </div>
+                    <div>
+                        <label for="bio" class="block text-sm font-bold text-slate-500 mb-2">Про себе</label>
+                        <textarea id="bio" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Розкажіть коротко про свій досвід" rows="3"></textarea>
+                    </div>
+                    <div>
+                        <label for="welcomeMessage" class="block text-sm font-bold text-slate-500 mb-2">Вітальне повідомлення для клієнтів</label>
+                        <textarea id="welcomeMessage" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Це повідомлення клієнт отримає на початку вашої роботи" rows="3"></textarea>
+                    </div>
+                </div>
             </div>
 
             <div class="mt-8 flex gap-4">
@@ -181,6 +196,7 @@
                 const loginBtn = document.getElementById('login-btn');
                 const registerBtn = document.getElementById('register-btn');
                 const toggleLink = document.getElementById('auth-mode-toggle');
+                const specialistFields = document.getElementById('specialist-fields');
             
                 // Reset to login view
                 title.innerText = role === 'admin' ? "Вход для ПРОФИ" : "Вход для КЛИЕНТА";
@@ -193,6 +209,7 @@
                 loginBtn.classList.remove('hidden');
                 registerBtn.classList.add('hidden');
                 toggleLink.innerText = 'Нет аккаунта? Зарегистрироваться';
+                specialistFields.classList.add('hidden'); // Always hide on open
 
                 modal.classList.add('open');
                 modal.setAttribute('aria-hidden', 'false');
@@ -222,7 +239,7 @@
             }
         }
 
-        function handleRegister() {
+       function handleRegister() {
             const name = document.getElementById('name').value.trim();
             const username = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value.trim();
@@ -232,21 +249,38 @@
                 return;
             }
 
-            const newUser = MockAPI.registerUser(currentRole, name, username, pass);
+            let profileData = {
+                fullName: name,
+                // Для клиента онбординг считается завершенным сразу
+                onboardingComplete: currentRole !== 'admin'
+            };
+
+            if (currentRole === 'admin') {
+                const specialization = document.getElementById('specialization').value.trim();
+                const bio = document.getElementById('bio').value.trim();
+                const welcomeMessage = document.getElementById('welcomeMessage').value.trim();
+
+                profileData.specializations = specialization ? [specialization] : [];
+                profileData.bio = bio;
+                profileData.welcomeMessage = welcomeMessage;
+            }
+
+            const newUser = MockAPI.registerUser(currentRole, name, username, pass, profileData);
+
+            console.log('Збережений профіл:', newUser);
 
             if (!newUser) {
                 alert('Этот логин уже занят. Пожалуйста, выберите другой.');
                 return;
             }
 
-            const loggedInUser = MockAPI.loginUser(newUser.id, newUser.pass);
-
-            if (loggedInUser) {
-                alert(`Регистрация успешна! Ваш логин для входа: ${loggedInUser.id}`);
-                const targetPage = loggedInUser.role === 'admin' ? 'admin.html' : 'cabinet.html';
-                window.location.href = targetPage;
+            // Після успішної реєстрації одразу логінимо користувача
+            const loggedInUser = MockAPI.loginUser(username, pass);
+            if(loggedInUser) {
+                 alert(`Регистрация успешна! Ваш логин для входа: ${loggedInUser.id}`);
+                 const targetPage = loggedInUser.role === 'admin' ? 'admin.html' : 'cabinet.html';
+                 window.location.href = targetPage;
             } else {
-                // Эта ошибка не должна происходить, если регистрация прошла успешно, но оставим на всякий случай
                 alert('Произошла ошибка при входе после регистрации.');
             }
         }
@@ -261,6 +295,7 @@
             const loginBtn = document.getElementById('login-btn');
             const registerBtn = document.getElementById('register-btn');
             const toggleLink = document.getElementById('auth-mode-toggle');
+            const specialistFields = document.getElementById('specialist-fields');
 
             if (isRegisterMode) {
                 modalTitle.innerText = currentRole === 'admin' ? "Регистрация ПРОФИ" : "Регистрация КЛИЕНТА";
@@ -270,6 +305,12 @@
                 loginBtn.classList.add('hidden');
                 registerBtn.classList.remove('hidden');
                 toggleLink.innerText = 'Уже есть аккаунт? Войти';
+
+                if (currentRole === 'admin') {
+                    specialistFields.classList.remove('hidden');
+                } else {
+                    specialistFields.classList.add('hidden');
+                }
             } else {
                 modalTitle.innerText = currentRole === 'admin' ? "Вход для ПРОФИ" : "Вход для КЛИЕНТА";
                 nameInput.classList.add('hidden');
@@ -278,6 +319,7 @@
                 loginBtn.classList.remove('hidden');
                 registerBtn.classList.add('hidden');
                 toggleLink.innerText = 'Нет аккаунта? Зарегистрироваться';
+                specialistFields.classList.add('hidden');
             }
         }
 
