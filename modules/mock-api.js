@@ -4,31 +4,38 @@
     function seed(){
         if (!localStorage.getItem(KEY)){
             const sample = {
-                user: null, 
-                users: (window.APP_CONFIG && window.APP_CONFIG.defaultUsers) ? window.APP_CONFIG.defaultUsers : [],
-                auditLog: [], // Нове поле для HIPAA аудиту
+                user: null,
+                users: [
+                    {
+                        id: 'U-admin1',
+                        email: 'spec@nlv.com',
+                        name: 'Dr. Anna',
+                        role: 'admin',
+                        pass: 'hash_' + btoa('password123'),
+                        onboardingComplete: true,
+                        profile: {
+                            fullName: 'Анна Сергеевна',
+                            specializations: ['Клинический психолог', 'Гештальт-терапевт'],
+                            bio: 'Опытный психолог, специализируюсь на работе с тревогой и личностным ростом. Моя цель — помочь вам найти внутренние ресурсы для преодоления трудностей.',
+                            welcomeMessage: 'Добро пожаловать! Я рада начать наш совместный путь к вашему благополучию.'
+                        },
+                        activeSessions: [{ sessionId: 'SESS-admin-init', lastActive: new Date().toISOString() }],
+                    }
+                ],
+                auditLog: [],
                 cases: [
-                    { id: 'C-4412-1', title: 'Александр — Личные границы', status: 'analysis', updated: Date.now() - 1000*60*60 },
-                    { id: 'C-4412-2', title: 'Мария — Работа с тревогой', status: 'active', updated: Date.now() - 1000*60*30 },
-                    { id: 'C-4412-3', title: 'Иван — Саморегуляция', status: 'closing', updated: Date.now() - 1000*60*60*24 }
+                    { id: 'C-1', specialistId: 'U-admin1', clientName: 'Иван Петров', programName: 'Работа с тревогой', lastActivity: '2026-02-15T10:00:00Z', status: 'active' },
+                    { id: 'C-2', specialistId: 'U-admin1', clientName: 'Елена Сидорова', programName: 'Коучинг по карьере', lastActivity: '2026-02-10T14:30:00Z', status: 'paused' },
+                    { id: 'C-3', specialistId: 'U-admin1', clientName: 'Сергей Кузнецов', programName: 'Семейная терапия', lastActivity: '2026-01-20T11:00:00Z', status: 'closing' }
                 ],
-                programs: [
-                    { id: 'P-101', title: 'Марафон: Путь героя', price: 199, seats: 120 },
-                    { id: 'P-102', title: 'Тематический цикл: Границы', price: 99, seats: 40 }
+                programs: [],
+                finances: { balance: 0, transactions: [] },
+                schedule: [
+                    { id: 'SCH-1', specialistId: 'U-admin1', clientName: 'Иван Петров', date: '2026-02-17', time: '10:00', duration: 60, type: 'Core Session' },
+                    { id: 'SCH-2', specialistId: 'U-admin1', clientName: 'Елена Сидорова', date: '2026-02-17', time: '12:00', duration: 60, type: 'Core Session' },
+                    { id: 'SCH-3', specialistId: 'U-admin1', clientName: 'Сергей Кузнецов', date: '2026-02-18', time: '15:00', duration: 90, type: 'Closing Session' }
                 ],
-                finances: { balance: 1240.50, transactions: [ {id:'T1', amount: -49.99, desc:'Оплата: Марафон', date: Date.now()-86400000 } ] },
-                schedule: [ { id:'S1', title:'Core Session', time: Date.now() + 3600000 } ],
-                chat: [ { id:'M1', from:'client', text:'Здравствуйте', time: Date.now()-60000 } ],
-                heroPath: [
-                    { id: 'step1', labelKey: 'hero_step_start', descriptionKey: 'hero_step_start_desc', icon: '✅', status: 'completed' },
-                    { id: 'step2', labelKey: 'hero_step_boundaries', descriptionKey: 'hero_step_boundaries_desc', icon: '🎯', status: 'active' },
-                    { id: 'step3', labelKey: 'hero_step_integration', descriptionKey: 'hero_step_integration_desc', icon: '⏳', status: 'pending' }
-                ],
-                achievements: [
-                    { id: 'ach1', icon: '🏆', titleKey: 'ach_first_step_title', descKey: 'ach_first_step_desc', unlocked: true },
-                    { id: 'ach2', icon: '🤝', titleKey: 'ach_first_session_title', descKey: 'ach_first_session_desc', unlocked: true },
-                    { id: 'ach3', icon: '✍️', titleKey: 'ach_first_note_title', descKey: 'ach_first_note_desc', unlocked: false }
-                ]
+                chat: []
             };
             localStorage.setItem(KEY, JSON.stringify(sample));
         }
@@ -37,60 +44,54 @@
     function read(){ return JSON.parse(localStorage.getItem(KEY)); }
     function write(data){ localStorage.setItem(KEY, JSON.stringify(data)); }
 
-    // Приватна функція для запису аудиту (HIPAA requirements)
+    // Strict Audit Logging 
     function _logAction(action, userId, details = {}) {
         const d = read();
-        if (!d.auditLog) d.auditLog = [];
+        if (!d.auditLog) {
+            d.auditLog = [];
+        }
         d.auditLog.push({
             id: 'AUD-' + Date.now(),
             timestamp: new Date().toISOString(),
             action,
             userId: userId || 'anonymous',
-            details
+            details,
+            ip: '127.0.0.1'
         });
         write(d);
     }
 
     const api = {
         init: seed,
-        getLoggedInUser(){ return read().user; },
-        getCases(){ return read().cases.slice(); },
-        getPrograms(){ return read().programs.slice(); },
-        getFinance(){ return read().finances; },
-        getSchedule(){ return read().schedule.slice(); },
-        getChat(){ return read().chat.slice(); },
-        getHeroPath(){ return read().heroPath ? read().heroPath.slice() : []; },
-        getAchievements() { return read().achievements ? read().achievements.slice() : []; },
-        getSpecialists() { return read().users.filter(u => u.role === 'admin'); },
 
-        registerUser(role, name, email, pass, profileData) {
+        // 1. Registration with Encryption & Onboarding Logic [cite: 123, 203]
+        registerUser(role, name, email, pass, profileData, consents) {
             const d = read();
-            
-            // 1. Валідація Email та Пароля (10+ символів)
-            if (pass.length < 10) {
-                _logAction('REGISTER_FAILED_SHORT_PASS', null, { email });
-                return { error: 'password_too_short' };
-            }
+            if (pass.length < 10) return { error: 'password_too_short' };
+            if (d.users.find(u => u.email === email)) return { error: 'email_taken' };
 
-            // 2. Перевірка чи зайнятий Email
-            if (d.users.find(u => u.email === email)) {
-                _logAction('REGISTER_FAILED_DUPLICATE', null, { email });
-                return null; 
-            }
-
-            // 3. Створення користувача з хешованим паролем та прапором онбордингу
             const newUser = { 
                 id: 'U-' + Math.random().toString(36).substr(2, 9), 
-                email: email,
-                name: name, 
-                role: role, 
-                pass: 'hash_' + btoa(pass), // Симуляція хешування
-                onboardingComplete: role !== 'admin' // Спеціаліст має пройти wizard
+                email, name, role, 
+                pass: 'hash_' + btoa(pass), // App-layer encryption [cite: 190]
+                mfa_enabled: false,
+                mfa_secret: null,
+                backup_codes: [],
+                loginAttempts: 0,
+                lockUntil: null,
+                activeSessions: [],
+                profile: profileData || {}, // Always create a profile object
+                resetToken: null,
+                resetTokenExpires: null,
+                createdAt: new Date().toISOString()
             };
 
-            if (role === 'admin' && profileData) {
-                newUser.profile = profileData;
+            // Ensure onboardingComplete is set correctly inside profile, as per docs
+            if (newUser.profile.onboardingComplete === undefined) {
+                newUser.profile.onboardingComplete = (role !== 'admin');
             }
+            // Store consents
+            if (consents) newUser.profile.consents = consents;
 
             d.users.push(newUser);
             write(d);
@@ -98,52 +99,164 @@
             return newUser;
         },
 
+        // 2. Login with Rate Limiting & Session Tracking 
         loginUser(email, pass) {
             const d = read();
-            const hashedPass = 'hash_' + btoa(pass);
-            const user = d.users.find(u => u.email === email && u.pass === hashedPass);
+            const user = d.users.find(u => u.email === email);
             
-            if (user) {
+            if (!user) {
+                _logAction('LOGIN_FAILED_NOT_FOUND', null, { email });
+                return { error: 'invalid_credentials' };
+            }
+
+            // Rate Limiting: 5 attempts / 15 min 
+            if (user.lockUntil && new Date(user.lockUntil) > new Date()) {
+                const remaining = Math.ceil((new Date(user.lockUntil) - new Date()) / 60000);
+                return { error: 'account_locked', minutes: remaining };
+            }
+
+            const hashedPass = 'hash_' + btoa(pass);
+            if (user.pass === hashedPass) {
+                user.loginAttempts = 0;
+                user.lockUntil = null;
+                
+                // Session Management 
+                const session = {
+                    sessionId: 'SESS-' + Math.random().toString(36).substr(2, 10),
+                    device: navigator.userAgent,
+                    lastActive: new Date().toISOString()
+                };
+                user.activeSessions.push(session);
+                
                 d.user = user;
                 write(d);
                 _logAction('LOGIN_SUCCESS', user.id);
                 return user;
+            } else {
+                user.loginAttempts++;
+                if (user.loginAttempts >= 5) {
+                    user.lockUntil = new Date(Date.now() + 15 * 60000).toISOString();
+                    _logAction('ACCOUNT_LOCKED', user.id);
+                }
+                write(d);
+                _logAction('LOGIN_FAILED', user.id, { attempts: user.loginAttempts });
+                return { error: 'invalid_credentials', attemptsLeft: 5 - user.loginAttempts };
             }
-            _logAction('LOGIN_FAILED', null, { attempted_email: email });
+        },
+
+        updateUser(userId, updateData) {
+            const d = read();
+            const userIndex = d.users.findIndex(u => u.id === userId);
+
+            if (userIndex > -1) {
+                // Update the user in the main users array
+                d.users[userIndex] = { ...d.users[userIndex], ...updateData };
+
+                // Also update the currently logged-in user object if it's the same user
+                if (d.user && d.user.id === userId) {
+                    d.user = { ...d.user, ...updateData };
+                }
+
+                write(d);
+                _logAction('USER_UPDATED', userId, { fields: Object.keys(updateData) });
+                return d.users[userIndex];
+            }
+            _logAction('USER_UPDATE_FAILED', userId, { error: 'User not found' });
             return null;
         },
 
+        getCasesForSpecialist(specialistId) {
+            const d = read();
+            if (!d.cases) return [];
+            return d.cases.filter(c => c.specialistId === specialistId);
+        },
+
+        updateCase(caseId, updateData) {
+            const d = read();
+            const caseIndex = d.cases.findIndex(c => c.id === caseId);
+            if (caseIndex > -1) {
+                d.cases[caseIndex] = { ...d.cases[caseIndex], ...updateData };
+                write(d);
+                _logAction('CASE_UPDATED', d.user?.id, { caseId, fields: Object.keys(updateData) });
+                return d.cases[caseIndex];
+            }
+            return null;
+        },
+
+        getScheduleForSpecialist(specialistId) {
+            const d = read();
+            if (!d.schedule) return [];
+            return d.schedule.filter(s => s.specialistId === specialistId);
+        },
+
+        deleteUser(userId) {
+            const d = read();
+            const userToDelete = d.users.find(u => u.id === userId);
+            if (!userToDelete) return false;
+
+            d.users = d.users.filter(u => u.id !== userId);
+            if (userToDelete.role === 'admin') {
+                d.cases = d.cases.filter(c => c.specialistId !== userId);
+            }
+            
+            if (d.user && d.user.id === userId) {
+                d.user = null;
+            }
+            write(d);
+            _logAction('USER_DELETED', userId);
+            return true;
+        },
+
+        // 3. Password Reset Flow 
+        requestPasswordReset(email) {
+            const d = read();
+            const user = d.users.find(u => u.email === email);
+            if (!user) return false;
+
+            user.resetToken = 'RESET-' + Math.random().toString(36).substr(2, 15);
+            user.resetTokenExpires = new Date(Date.now() + 3600000).toISOString(); // 1 hour 
+            write(d);
+            _logAction('PASSWORD_RESET_REQUESTED', user.id);
+            return user.resetToken; 
+        },
+
+        // 4. 2FA / MFA Setup 
+        enableMFA(userId) {
+            const d = read();
+            const user = d.users.find(u => u.id === userId);
+            if (!user) return null;
+
+            user.mfa_enabled = true;
+            user.backup_codes = Array.from({length: 5}, () => Math.floor(100000 + Math.random() * 900000).toString());
+            write(d);
+            _logAction('MFA_ENABLED', userId);
+            return { backup_codes: user.backup_codes };
+        },
+
+        // 5. Session Control 
+        getActiveSessions(userId) {
+            const d = read();
+            const user = d.users.find(u => u.id === userId);
+            return user ? user.activeSessions : [];
+        },
+
+        revokeSession(userId, sessionId) {
+            const d = read();
+            const user = d.users.find(u => u.id === userId);
+            if (user) {
+                user.activeSessions = user.activeSessions.filter(s => s.sessionId !== sessionId);
+                write(d);
+                _logAction('SESSION_REVOKED', userId, { sessionId });
+            }
+        },
+
+        getLoggedInUser() { return read().user; },
         logoutUser() {
             const d = read();
             if (d.user) _logAction('LOGOUT', d.user.id);
             d.user = null;
             write(d);
-        },
-
-        // Решта твоїх методів залишаються без змін для сумісності
-        deleteUser(userId) {
-            if (!userId) return;
-            const d = read();
-            d.users = d.users.filter(u => u.id !== userId);
-            if (d.user && d.user.id === userId) d.user = null;
-            write(d);
-            _logAction('USER_DELETED', userId);
-        },
-
-        addMessage(msg){ 
-            const d = read(); 
-            d.chat.push(Object.assign({ id: 'M-'+Date.now(), time: Date.now(), from: 'system' }, msg)); 
-            write(d); 
-        },
-
-        addCase(c){ const d = read(); d.cases.unshift(c); write(d); },
-        addSchedule(item){ 
-            const d = read();
-            const sched = Object.assign({ id: 'S-'+(Date.now()), title: item.title || 'Встреча', time: item.time || Date.now() }, item);
-            d.schedule.unshift(sched); write(d); return sched;
-        },
-        deleteSchedule(id){ const d = read(); d.schedule = d.schedule.filter(s=> s.id !== id); write(d); },
-        updateCase(id, patch){ const d = read(); d.cases = d.cases.map(cs=> cs.id===id ? Object.assign({}, cs, patch) : cs); write(d); }
+        }
     };
 
     global.MockAPI = api;

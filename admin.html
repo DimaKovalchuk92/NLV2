@@ -5,952 +5,390 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Панель Специалиста | Platform OS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style-cabinet.css"> </head>
+    <link rel="stylesheet" href="style-cabinet.css">
+    <style>
+        /* Додаткові стилі для роботи вкладок */
+        .tab-pane { display: none; animation: fadeIn 0.5s; }
+        .tab-pane.active { display: block; }
+        .nav-tab { cursor: pointer; transition: all 0.3s; }
+        .nav-tab.active { color: #2563eb; border-bottom: 2px solid #2563eb; font-weight: bold; }
+        .hidden { display: none !important; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
 <body class="bg-slate-50 text-slate-900 font-sans flex min-h-screen">
 
-    <!-- Sidebar: main navigation for specialist panel. Edit links below as needed -->
     <aside class="sidebar fixed h-screen z-50">
-    <div class="logo font-black italic tracking-tighter">
-        NEW LIFE <span class="text-blue-600">VISION</span>
-    </div>
+        <div class="logo font-black italic tracking-tighter">
+            NEW LIFE <span class="text-blue-600">VISION</span>
+        </div>
         <nav class="mt-12 space-y-4">
-            <!-- sidebar links: change text/href or ids for custom behaviour -->
-            <a href="#" class="sidebar-link active">👥 <span data-translate-key="nav_clients">Мои клиенты</span></a>
-            <!-- id="sidebar-calendar" used in script to open schedule tab -->
+            <a href="#" class="sidebar-link active" data-target="tab-dashboard">👥 <span data-translate-key="nav_clients">Мои клиенты</span></a>
             <a href="#" id="sidebar-calendar" class="sidebar-link">📅 <span data-translate-key="nav_calendar">Календарь</span></a>
             <a href="#" class="sidebar-link">🧩 <span data-translate-key="nav_methodology">Методология</span></a>
             <a href="index.html" class="sidebar-link">🏠 <span data-translate-key="nav_exit">Выйти</span></a>
         </nav>
-    <div class="mt-auto pt-10">
-        <span class="px-3 py-1 bg-slate-900 text-white text-[10px] font-bold rounded-md uppercase tracking-widest" data-translate-key="role_specialist">
-            Специалист
-        </span>
-    </div>
-</aside>
+        <div class="mt-auto pt-10">
+            <span class="px-3 py-1 bg-slate-900 text-white text-[10px] font-bold rounded-md uppercase tracking-widest" data-translate-key="role_specialist">
+                Специалист
+            </span>
+        </div>
+    </aside>
 
     <main class="content-area">
-        <header class="header-main">
-             <div class="user-greeting">
+        <header class="header-main relative">
+            <div class="user-greeting">
                 <div>
                     <h1 id="specialist-name" class="text-3xl font-bold">Панель Специалиста</h1>
                     <p id="specialist-spec" class="text-slate-500 font-medium"></p>
                 </div>
-                <div id="specialist-avatar" class="avatar shadow-lg bg-slate-900">A</div>
-             </div>
+                <div id="specialist-avatar" class="avatar shadow-lg bg-slate-900 text-white flex items-center justify-center text-xl font-bold rounded-full w-12 h-12">S</div>
+            </div>
+            <div id="session-id-display" class="absolute top-4 right-6 text-[10px] text-slate-400 uppercase tracking-widest"></div>
         </header>
 
-        <!-- Верхние вкладки согласно structure.json -->
-        <nav class="nav-tabs-container" role="tablist">
-            <div class="nav-tab active" data-target="tab-dashboard" data-translate-key="tab_dashboard">Дашборд</div>
-            <div class="nav-tab" data-target="tab-cases" data-translate-key="tab_cases">Кейсы</div>
-            <div class="nav-tab" data-target="tab-marketplace" data-translate-key="tab_marketplace">Маркетплейс</div>
-            <div class="nav-tab" data-target="tab-finance" data-translate-key="tab_finance">Финансы</div>
-            <div class="nav-tab" data-target="tab-schedule" data-translate-key="tab_schedule">Расписание</div>
-            <div class="nav-tab" onclick="openAdminSettingsModal()" data-translate-key="tab_settings">Настройки страницы</div>
+        <nav class="nav-tabs-container flex gap-6 border-b border-slate-200 mb-8 px-8" role="tablist">
+            <div class="nav-tab active pb-4" data-target="tab-dashboard" data-translate-key="tab_dashboard">Дашборд</div>
+            <div class="nav-tab pb-4" data-target="tab-cases" data-translate-key="tab_cases">Кейсы</div>
+            <div class="nav-tab pb-4" data-target="tab-marketplace" data-translate-key="tab_marketplace">Маркетплейс</div>
+            <div class="nav-tab pb-4" data-target="tab-finance" data-translate-key="tab_finance">Финансы</div>
+            <div class="nav-tab pb-4" data-target="tab-schedule" data-translate-key="tab_schedule">Расписание</div>
+            <div class="nav-tab pb-4 text-slate-400" data-action="open-settings" data-translate-key="tab_settings">Настройки страницы</div>
         </nav>
 
-        <!-- Tab content: panes are switched by top tabs. Use data-target values on tabs. -->
-        <div class="tab-content">
+        <div class="tab-content px-8">
             <section id="tab-dashboard" class="tab-pane active">
-                <h2 class="section-title mb-8" data-translate-key="dashboard_title">Активные кейсы (Case Engine)</h2>
-                <div id="cases-list" class="grid grid-cols-1 gap-4">
-                    <!-- кейсы будут подгружаться сюда -->
-                </div>
+                <h2 class="text-2xl font-bold mb-8" data-translate-key="dashboard_title">Активные кейсы (Case Engine)</h2>
+                <div id="cases-list" class="grid grid-cols-1 gap-4"></div>
             </section>
 
             <section id="tab-cases" class="tab-pane">
-                <h2 class="section-title mb-6" data-translate-key="tab_cases">Кейсы</h2>
-                <p class="text-slate-500">Список кейсов и управление ими будет здесь.</p>
-            </section>
-
-            <section id="tab-marketplace" class="tab-pane">
-                <h2 class="section-title mb-6" data-translate-key="tab_marketplace">Маркетплейс</h2>
-                <p class="text-slate-500">Каталог специалистов и программ.</p>
-            </section>
-
-            <section id="tab-finance" class="tab-pane">
-                <h2 class="section-title mb-6" data-translate-key="tab_finance">Финансовая панель</h2>
-                <p class="text-slate-500">Платежи, счета и отчёты.</p>
+                <h2 class="text-2xl font-bold mb-6" data-translate-key="tab_cases">Кейсы</h2>
+                <p class="text-slate-500">Список всех кейсов.</p>
             </section>
 
             <section id="tab-schedule" class="tab-pane">
-                <h2 class="section-title mb-6" data-translate-key="tab_schedule">Расписание</h2>
-                <!-- Date selector: change to your own datepicker widget if desired -->
+                <h2 class="text-2xl font-bold mb-6" data-translate-key="tab_schedule">Расписание</h2>
                 <div class="mb-4">
                     <label class="text-sm text-slate-600"><span data-translate-key="schedule_select_date">Выберите дату:</span>
                         <input id="schedule-date" type="date" class="ml-2 px-3 py-2 border rounded">
                     </label>
                 </div>
-                <!-- Schedule list: JS renders items here. Each item gets data-id and has a delete button. -->
-                <div id="schedule-list" class="space-y-4">
-                    <!-- расписание будет отрисовано здесь -->
-                </div>
+                <div id="schedule-list" class="space-y-4"></div>
             </section>
-        </div>
 
+            </div>
     </main>
+
+    <!-- Модальное окно Настроек -->
+    <div id="admin-settings-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[200] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeAdminSettingsModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:text-red-500 transition">✕</button>
+            
+            <h2 class="text-2xl font-bold mb-8" data-translate-key="settings_title">Настройки страницы</h2>
+            
+            <!-- Profile Section -->
+            <div class="p-6 mb-8 border border-slate-200 rounded-2xl">
+                <h3 class="font-bold mb-4" data-translate-key="settings_profile_title">Мой профиль</h3>
+                <p id="profile-display-name" class="text-lg font-bold"></p>
+                <p id="profile-display-spec" class="text-slate-500"></p>
+                <p id="profile-display-bio" class="text-sm text-slate-600 mt-4"></p>
+                <p id="profile-display-welcome" class="text-sm text-slate-600 mt-2 italic p-3 bg-slate-50 rounded-lg"></p>
+            </div>
+
+            <!-- Appearance Section -->
+            <div class="p-6 mb-8 border border-slate-200 rounded-2xl">
+                <h3 class="text-xl font-bold mb-6" data-translate-key="settings_appearance">Внешний вид</h3>
+                <div class="flex gap-4">
+                    <button id="theme-btn-light" onclick="setTheme('light')" class="flex-1 py-4 border-2 border-slate-100 rounded-2xl font-bold hover:border-blue-500 focus:border-blue-600 transition flex flex-col items-center gap-2">
+                        <span class="text-2xl">☀️</span> <span data-translate-key="settings_theme_light">Светлая</span>
+                    </button>
+                    <button id="theme-btn-dark" onclick="setTheme('dark')" class="flex-1 py-4 border-2 border-slate-100 rounded-2xl font-bold hover:border-blue-500 focus:border-blue-600 transition flex flex-col items-center gap-2">
+                        <span class="text-2xl">🌙</span> <span data-translate-key="settings_theme_dark">Темная</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Language Section -->
+            <div class="p-6 mb-8 border border-slate-200 rounded-2xl">
+                <h3 class="text-xl font-bold mb-6" data-translate-key="settings_language">Язык интерфейса</h3>
+                <div class="space-y-4">
+                    <label class="flex items-center gap-4 p-4 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                        <input type="radio" name="lang" value="ru" onchange="setLanguage('ru')" class="w-5 h-5 text-blue-600">
+                        <span class="font-bold" data-translate-key="lang_ru">Русский</span>
+                    </label>
+                    <label class="flex items-center gap-4 p-4 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                        <input type="radio" name="lang" value="ua" onchange="setLanguage('ua')" class="w-5 h-5 text-blue-600">
+                        <span class="font-bold" data-translate-key="lang_ua">Українська</span>
+                    </label>
+                    <label class="flex items-center gap-4 p-4 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                        <input type="radio" name="lang" value="en" onchange="setLanguage('en')" class="w-5 h-5 text-blue-600">
+                        <span class="font-bold" data-translate-key="lang_en">English</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="mt-8 bg-red-50 p-6 rounded-2xl border border-red-200">
+                <h3 class="text-xl font-bold mb-2 text-red-800" data-translate-key="settings_delete_account_title">Удаление аккаунта</h3>
+                <p class="text-red-600 mb-6" data-translate-key="settings_delete_account_desc">Это действие необратимо. Все ваши данные, включая кейсы клиентов, будут удалены.</p>
+                <button onclick="handleAccountDeletion()" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-red-700 transition" data-translate-key="settings_delete_account_btn">Удалить аккаунт</button>
+            </div>
+        </div>
+    </div>
 
     <script src="config.js"></script>
     <script src="modules/mock-api.js"></script>
     <script>
-        // Initialize mock data
-        MockAPI.init();
-        let adminLastReadTime = parseInt(localStorage.getItem('adminLastReadTime') || '0');
-
+        // --- 1. Данные и Переводы ---
         const translations = {
             ru: {
-                nav_clients: 'Мои клиенты',
-                nav_calendar: 'Календарь',
-                nav_methodology: 'Методология',
-                nav_exit: 'Выйти',
-                role_specialist: 'Специалист',
-                header_title: 'Панель',
-                header_title_span: 'Специалиста',
-                tab_dashboard: 'Дашборд',
-                tab_cases: 'Кейсы',
-                tab_marketplace: 'Маркетплейс',
-                tab_finance: 'Финансы',
-                tab_schedule: 'Расписание',
-                tab_settings: 'Настройки страницы',
-                dashboard_title: 'Активные кейсы (Case Engine)',
-                case_status: 'Статус',
-                case_open_map: 'Открыть карту',
-                case_chat: 'Чат',
-                case_assign_meeting: 'Назначить встречу',
-                schedule_title: 'Расписание',
-                schedule_select_date: 'Выберите дату:',
-                schedule_no_meetings: 'Нет назначенных встреч',
-                schedule_delete: 'Удалить',
-                schedule_delete_confirm: 'Удалить эту запись расписания?',
-                settings_title: 'Настройки страницы',
-                settings_appearance: 'Внешний вид',
-                settings_theme_light: 'Светлая',
-                settings_theme_dark: 'Темная',
-                settings_language: 'Язык системы',
-                lang_ru: 'Русский',
-                lang_ua: 'Українська',
-                lang_en: 'English',
-                meeting_modal_title: 'Новая встреча',
-                meeting_modal_client: 'Клиент:',
-                meeting_modal_datetime: 'Дата и время',
-                meeting_modal_topic: 'Тема встречи',
-                meeting_modal_topic_placeholder: 'Например: Core Session',
-                meeting_modal_cancel: 'Отмена',
-                meeting_modal_assign: 'Назначить',
-                meeting_alert_select_time: 'Пожалуйста, выберите дату и время',
-                meeting_system_message: '📅 Назначена новая встреча: "{topic}" на {datetime}',
-                meeting_default_topic: 'Плановая сессия',
-                chat_modal_title: 'Чат с клиентом',
-                chat_modal_placeholder: 'Напишите сообщение...',
-                date_today: 'Сегодня',
-                date_yesterday: 'Вчера',
+                tab_dashboard: 'Дашборд', tab_cases: 'Кейсы', tab_schedule: 'Расписание',
+                tab_settings: 'Настройки страницы', dashboard_title: 'Активные кейсы (Case Engine)',
+                nav_clients: 'Мои клиенты', nav_calendar: 'Календарь', nav_exit: 'Выйти', role_specialist: 'Специалист',
+                settings_title: 'Настройки страницы', settings_profile_title: 'Мой профиль',
+                settings_appearance: 'Внешний вид', settings_theme_light: 'Светлая', settings_theme_dark: 'Темная',
+                settings_language: 'Язык интерфейса', lang_ru: 'Русский', lang_ua: 'Українська', lang_en: 'English',
                 settings_delete_account_title: 'Удаление аккаунта',
-                settings_delete_account_desc: 'Это действие необратимо. Все ваши данные будут удалены.',
-                settings_delete_account_btn: 'Удалить аккаунт',
-                settings_delete_account_confirm: 'Вы уверены, что хотите удалить свой аккаунт? Это действие необратимо.',
-                settings_profile_title: 'Мой профиль',
-                settings_profile_name: 'Полное имя',
-                settings_profile_spec: 'Специализация',
-                settings_profile_bio: 'Биография',
-                settings_profile_welcome: 'Приветственное сообщение'
+                settings_delete_account_desc: 'Это действие необратимо. Все ваши данные, включая кейсы клиентов, будут удалены.',
+                settings_delete_account_btn: 'Удалить аккаунт'
             },
             ua: {
-                nav_clients: 'Мої клієнти',
-                nav_calendar: 'Календар',
-                nav_methodology: 'Методологія',
-                nav_exit: 'Вийти',
-                role_specialist: 'Спеціаліст',
-                header_title: 'Панель',
-                header_title_span: 'Спеціаліста',
-                tab_dashboard: 'Дашборд',
-                tab_cases: 'Кейси',
-                tab_marketplace: 'Маркетплейс',
-                tab_finance: 'Фінанси',
-                tab_schedule: 'Розклад',
-                tab_settings: 'Налаштування сторінки',
-                dashboard_title: 'Активні кейси (Case Engine)',
-                case_status: 'Статус',
-                case_open_map: 'Відкрити карту',
-                case_chat: 'Чат',
-                case_assign_meeting: 'Призначити зустріч',
-                schedule_title: 'Розклад',
-                schedule_select_date: 'Оберіть дату:',
-                schedule_no_meetings: 'Немає призначених зустрічей',
-                schedule_delete: 'Видалити',
-                schedule_delete_confirm: 'Видалити цей запис розкладу?',
-                settings_title: 'Налаштування сторінки',
-                settings_appearance: 'Зовнішній вигляд',
-                settings_theme_light: 'Світла',
-                settings_theme_dark: 'Темна',
-                settings_language: 'Мова системи',
-                lang_ru: 'Русский',
-                lang_ua: 'Українська',
-                lang_en: 'English',
-                meeting_modal_title: 'Нова зустріч',
-                meeting_modal_client: 'Клієнт:',
-                meeting_modal_datetime: 'Дата і час',
-                meeting_modal_topic: 'Тема зустрічі',
-                meeting_modal_topic_placeholder: 'Наприклад: Core Session',
-                meeting_modal_cancel: 'Скасувати',
-                meeting_modal_assign: 'Призначити',
-                meeting_alert_select_time: 'Будь ласка, оберіть дату та час',
-                meeting_system_message: '📅 Призначено нову зустріч: "{topic}" на {datetime}',
-                meeting_default_topic: 'Планова сесія',
-                chat_modal_title: 'Чат з клієнтом',
-                chat_modal_placeholder: 'Напишіть повідомлення...',
-                date_today: 'Сьогодні',
-                date_yesterday: 'Вчора',
-                settings_delete_account_title: 'Видалення акаунту',
-                settings_delete_account_desc: 'Ця дія є незворотною. Всі ваші дані буде видалено.',
-                settings_delete_account_btn: 'Видалити акаунт',
-                settings_delete_account_confirm: 'Ви впевнені, що хочете видалити свій акаунт? Ця дія є незворотною.',
-                settings_profile_title: 'Мій профіль',
-                settings_profile_name: 'Повне ім\'я',
-                settings_profile_spec: 'Спеціалізація',
-                settings_profile_bio: 'Біографія',
-                settings_profile_welcome: 'Вітальне повідомлення'
+                tab_dashboard: 'Дашборд', tab_cases: 'Кейси', tab_schedule: 'Розклад',
+                tab_settings: 'Налаштування', dashboard_title: 'Активні кейси', role_specialist: 'Спеціаліст',
+                nav_clients: 'Мої клієнти', nav_calendar: 'Календар', nav_exit: 'Вийти',
+                settings_title: 'Налаштування', settings_profile_title: 'Мій профіль'
             },
             en: {
-                nav_clients: 'My Clients',
-                nav_calendar: 'Calendar',
-                nav_methodology: 'Methodology',
-                nav_exit: 'Exit',
-                role_specialist: 'Specialist',
-                header_title: 'Specialist',
-                header_title_span: 'Panel',
-                tab_dashboard: 'Dashboard',
-                tab_cases: 'Cases',
-                tab_marketplace: 'Marketplace',
-                tab_finance: 'Finance',
-                tab_schedule: 'Schedule',
-                tab_settings: 'Page Settings',
-                dashboard_title: 'Active Cases (Case Engine)',
-                case_status: 'Status',
-                case_open_map: 'Open Map',
-                case_chat: 'Chat',
-                case_assign_meeting: 'Assign Meeting',
-                schedule_title: 'Schedule',
-                schedule_select_date: 'Select date:',
-                schedule_no_meetings: 'No scheduled meetings',
-                schedule_delete: 'Delete',
-                schedule_delete_confirm: 'Delete this schedule entry?',
-                settings_title: 'Page Settings',
-                settings_appearance: 'Appearance',
-                settings_theme_light: 'Light',
-                settings_theme_dark: 'Dark',
-                settings_language: 'System Language',
-                lang_ru: 'Русский',
-                lang_ua: 'Українська',
-                lang_en: 'English',
-                meeting_modal_title: 'New Meeting',
-                meeting_modal_client: 'Client:',
-                meeting_modal_datetime: 'Date and time',
-                meeting_modal_topic: 'Meeting Topic',
-                meeting_modal_topic_placeholder: 'E.g., Core Session',
-                meeting_modal_cancel: 'Cancel',
-                meeting_modal_assign: 'Assign',
-                meeting_alert_select_time: 'Please select a date and time',
-                meeting_system_message: '📅 New meeting scheduled: "{topic}" on {datetime}',
-                meeting_default_topic: 'Scheduled Session',
-                chat_modal_title: 'Chat with Client',
-                chat_modal_placeholder: 'Write a message...',
-                date_today: 'Today',
-                date_yesterday: 'Yesterday',
-                settings_delete_account_title: 'Delete Account',
-                settings_delete_account_desc: 'This action is irreversible. All your data will be deleted.',
-                settings_delete_account_btn: 'Delete Account',
-                settings_delete_account_confirm: 'Are you sure you want to delete your account? This action is irreversible.',
-                settings_profile_title: 'My Profile',
-                settings_profile_name: 'Full Name',
-                settings_profile_spec: 'Specialization',
-                settings_profile_bio: 'Biography',
-                settings_profile_welcome: 'Welcome Message'
+                tab_dashboard: 'Dashboard', tab_cases: 'Cases', tab_schedule: 'Schedule',
+                tab_settings: 'Settings', dashboard_title: 'Active Cases (Case Engine)', role_specialist: 'Specialist',
+                nav_clients: 'My Clients', nav_calendar: 'Calendar', nav_exit: 'Exit'
             }
         };
 
-        // --- debug panel (visible on the page) to help when DevTools is not used ---
-        window.__STATUS_DEBUG = true;
-        function initDebugPanel(){
-            if (!window.__STATUS_DEBUG) return null;
-            let d = document.getElementById('debug-panel');
-            if (!d){
-                d = document.createElement('div');
-                d.id = 'debug-panel';
-                d.style.position = 'fixed';
-                d.style.right = '12px';
-                d.style.bottom = '12px';
-                d.style.width = '320px';
-                d.style.maxHeight = '40vh';
-                d.style.overflow = 'auto';
-                d.style.background = 'rgba(255,255,255,0.95)';
-                d.style.border = '1px solid rgba(0,0,0,0.06)';
-                d.style.boxShadow = '0 8px 30px rgba(2,6,23,0.08)';
-                d.style.fontSize = '12px';
-                d.style.zIndex = 999999;
-                d.style.padding = '6px';
-                d.style.borderRadius = '8px';
-                d.innerHTML = '<strong style="display:block;margin-bottom:6px">DEBUG</strong>';
-                document.body.appendChild(d);
-            }
-            return d;
-        }
-        const __debugPanel = initDebugPanel();
-        function debugLog(){
-            if (!window.__STATUS_DEBUG) return;
-            try{
-                const args = Array.from(arguments).map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a)) ).join(' ');
-                if (__debugPanel){ const el = document.createElement('div'); el.textContent = args; el.style.padding = '4px 0'; el.style.borderBottom = '1px solid rgba(0,0,0,0.03)'; __debugPanel.appendChild(el); __debugPanel.scrollTop = __debugPanel.scrollHeight; }
-                console.log('[STATUS-DBG]', ...arguments);
-            }catch(e){ console.log('[STATUS-DBG]', ...arguments); }
-        }
-
-        // Render cases into the dashboard list
-        function renderCases(){
-            const list = document.getElementById('cases-list');
-            if (!list) return;
-            const cases = MockAPI.getCases();
-            const messages = MockAPI.getChat();
-            const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
-            const hasUnread = lastMsg && lastMsg.from === 'client' && lastMsg.time > adminLastReadTime;
+        // --- 2. Функции UI ---
+        function applyTranslations() {
             const lang = localStorage.getItem('appLang') || 'ru';
-            const dict = translations[lang];
-
-            list.innerHTML = cases.map(c=>`
-                <div class="activity-card">
-                    <div class="left">
-                        <h3 class="text-xl font-bold mb-2">${c.title}</h3>
-                        <div class="text-slate-400 text-sm mb-2">(${c.id})</div>
-                        <div class="status-wrap">
-                            <button class="status-btn" data-id="${c.id}">${dict.case_status}: <strong>${c.status}</strong></button>
-                        </div>
-                    </div>
-                    <div class="actions">
-                        <button class="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold text-sm">${dict.case_open_map}</button>
-                        <button onclick="openChat('${c.id}', '${c.title.replace(/"/g, '&quot;')}')" class="px-6 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-blue-50 hover:text-blue-600 transition relative">
-                            ${dict.case_chat}
-                            ${hasUnread ? '<span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>' : ''}
-                        </button>
-                        <button data-action="assign-meeting" data-id="${c.id}" data-title="${c.title.replace(/"/g, '&quot;')}" class="px-6 py-2 bg-green-600 text-white rounded-xl font-bold text-sm">${dict.case_assign_meeting}</button>
-                    </div>
-                </div>
-            `).join('');
-
-            attachStatusHandlers();
-        }
-
-        /**
-         * E02: Workspace Personalization
-         * Loads specialist profile data (name, specialization) into the header and settings modal.
-         */
-        function loadSpecialistProfile() {
-            const user = MockAPI.getLoggedInUser();
-            if (!user || !user.profile) {
-                console.warn("Specialist profile data not found. UI will not be personalized.");
-                return;
-            }
-
-            // --- Header Personalization ---
-            document.getElementById('specialist-name').textContent = user.profile.fullName || 'Специалист';
-            document.getElementById('specialist-spec').textContent = (user.profile.specializations && user.profile.specializations[0]) || '';
-            document.getElementById('specialist-avatar').textContent = (user.profile.fullName && user.profile.fullName.charAt(0).toUpperCase()) || 'S';
-
-            // --- Settings Modal Personalization ---
-            document.getElementById('profile-display-name').textContent = user.profile.fullName || '...';
-            document.getElementById('profile-display-spec').textContent = (user.profile.specializations && user.profile.specializations.join(', ')) || '...';
-            document.getElementById('profile-display-bio').textContent = user.profile.bio || '...';
-            document.getElementById('profile-display-welcome').textContent = user.profile.welcomeMessage || '...';
-        }
-
-        // --- Status Portal Logic ---
-        let statusPortal = null;
-
-        function initStatusPortal() {
-            if (statusPortal) return;
-            statusPortal = document.getElementById('status-portal');
-            if (!statusPortal) {
-                statusPortal = document.createElement('div');
-                statusPortal.id = 'status-portal';
-                statusPortal.className = 'status-portal';
-                document.body.appendChild(statusPortal);
-            }
-            // Принудительно ставим absolute, чтобы меню скроллилось вместе со страницей
-            statusPortal.style.position = 'absolute';
-            
-            // Handle clicks inside portal
-            statusPortal.addEventListener('click', (e) => {
-                const item = e.target.closest('.status-item');
-                if (item) {
-                    const id = statusPortal.dataset.caseId;
-                    const val = item.dataset.value;
-                    MockAPI.updateCase(id, { status: val });
-                    closePortal();
-                    renderCases();
-                }
+            const dict = translations[lang] || translations.ru;
+            document.querySelectorAll('[data-translate-key]').forEach(el => {
+                const key = el.getAttribute('data-translate-key');
+                if (dict[key]) el.innerText = dict[key];
             });
         }
 
-        function closePortal() {
-            if (!statusPortal) return;
-            statusPortal.classList.remove('open');
-            document.removeEventListener('click', onOutsideClick);
-            setTimeout(() => {
-                if (!statusPortal.classList.contains('open')) statusPortal.style.display = 'none';
-            }, 200);
-        }
+        function switchTab(targetId) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            const activeTab = document.querySelector(`[data-target="${targetId}"]`);
+            if (activeTab) activeTab.classList.add('active');
 
-        function onOutsideClick(e) {
-            if (statusPortal.contains(e.target)) return;
-            closePortal();
-        }
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active')); // Сначала скрываем все
+            const targetPane = document.getElementById(targetId);
+            if (targetPane) targetPane.classList.add('active'); // Затем показываем нужную
 
-        function openPortal(btn) {
-            initStatusPortal();
-            // Toggle if same button
-            if (statusPortal.classList.contains('open') && statusPortal.dataset.caseId === btn.dataset.id) {
-                closePortal();
-                return;
-            }
-            closePortal(); // close any other
-
-            const STATUS_VALUES = ['analysis','active','closing','paused'];
-            statusPortal.innerHTML = STATUS_VALUES.map(s=>`<div class="status-item" data-value="${s}">${s}</div>`).join('');
-            statusPortal.dataset.caseId = btn.dataset.id;
-            statusPortal.style.display = 'block';
-
-            const rect = btn.getBoundingClientRect();
-            const mw = 160;
-            
-            // Считаем координаты относительно документа (viewport + scroll)
-            let left = rect.left + window.scrollX;
-            let top = rect.bottom + 8 + window.scrollY;
-
-            if (rect.left + mw > window.innerWidth - 8) {
-                left = (window.innerWidth - mw - 8) + window.scrollX;
-            }
-
-            statusPortal.style.left = left + 'px';
-            statusPortal.style.top = top + 'px';
-            
-            requestAnimationFrame(() => statusPortal.classList.add('open'));
-            setTimeout(() => document.addEventListener('click', onOutsideClick), 0);
-        }
-
-        function attachStatusHandlers(){
-            initStatusPortal();
-            document.querySelectorAll('.status-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    openPortal(btn);
-                });
-            });
-        }
-
-        function renderSchedule(dateISO){
-            const list = document.getElementById('schedule-list');
-            if (!list) return;
-            const all = MockAPI.getSchedule();
-            const lang = localStorage.getItem('appLang') || 'ru';
-            const dict = translations[lang];
-            const items = dateISO ? all.filter(it => new Date(it.time).toISOString().substr(0,10) === dateISO) : all;
-            if (!items.length) { list.innerHTML = `<div class="text-slate-500">${dict.schedule_no_meetings}</div>`; return; }
-            list.innerHTML = items.map(it=>`
-                <div class="activity-card p-4" data-id="${it.id}">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <div class="font-bold">${it.title}</div>
-                            <div class="text-sm text-slate-500">${new Date(it.time).toLocaleString(lang)}</div>
-                        </div>
-                        <div>
-                            <button onclick="deleteSchedule('${it.id}')" class="btn-delete px-4 py-2 bg-red-500 text-white rounded-md text-sm">${dict.schedule_delete}</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function deleteSchedule(id){
-            if (!id) return;
-            const lang = localStorage.getItem('appLang') || 'ru';
-            if (!confirm(translations[lang].schedule_delete_confirm)) return;
-            MockAPI.deleteSchedule(id);
-            const dateInput = document.getElementById('schedule-date');
-            renderSchedule(dateInput ? dateInput.value : undefined);
-        }
-
-        // --- Meeting Modal Logic ---
-        let currentMeetingCase = null;
-
-        function assignMeeting(caseId, caseTitle) {
-            currentMeetingCase = { id: caseId, title: caseTitle };
-            
-            const modal = document.getElementById('meeting-modal');
-            const titleEl = document.getElementById('meeting-case-title');
-            const dateInput = document.getElementById('meeting-datetime');
-            const lang = localStorage.getItem('appLang') || 'ru';
-            const dict = translations[lang];
-            
-            if (titleEl) titleEl.innerText = `${dict.meeting_modal_client} ${caseTitle}`;
-            // Устанавливаем текущее время + 1 час как дефолт
-            const now = new Date();
-            now.setHours(now.getHours() + 1);
-            now.setMinutes(0);
-            // Формат для input type="datetime-local": YYYY-MM-DDTHH:mm
-            const iso = now.toISOString().slice(0, 16);
-            if (dateInput) dateInput.value = iso;
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function closeMeetingModal() {
-            const modal = document.getElementById('meeting-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            currentMeetingCase = null;
-        }
-
-        function confirmMeeting() {
-            if (!currentMeetingCase) return;
-            
-            const lang = localStorage.getItem('appLang') || 'ru';
-            const dict = translations[lang];
-            const dateInput = document.getElementById('meeting-datetime');
-            const topicInput = document.getElementById('meeting-topic');
-            
-            if (!dateInput.value) {
-                alert(dict.meeting_alert_select_time);
-                return;
-            }
-
-            const ts = new Date(dateInput.value).getTime();
-            const topic = topicInput.value.trim() || dict.meeting_default_topic;
-            const title = `${topic} (${currentMeetingCase.title})`;
-            const datetimeString = new Date(ts).toLocaleString(lang, {day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'});
-
-            // 1. Создаем запись в расписании (Activity Hub)
-            MockAPI.addSchedule({ 
-                title: title, 
-                time: ts, 
-                caseId: currentMeetingCase.id,
-                type: 'session' // метка типа
-            });
-
-            // 2. Отправляем уведомление клиенту (сообщение в чат)
-            MockAPI.addMessage({
-                from: 'system',
-                text: dict.meeting_system_message.replace('{topic}', topic).replace('{datetime}', datetimeString)
-            });
-
-            closeMeetingModal();
-            renderSchedule();
-        }
-
-        // --- Chat Logic ---
-        let currentChatCaseId = null;
-
-        function openChat(caseId, clientName) {
-            currentChatCaseId = caseId;
-            const modal = document.getElementById('admin-chat-modal');
-            const nameEl = document.getElementById('chat-client-name');
-            if (nameEl) nameEl.innerText = clientName || 'Клиент';
-            
-            if (modal) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-                
-                // Mark as read
-                adminLastReadTime = Date.now();
-                localStorage.setItem('adminLastReadTime', adminLastReadTime);
-                renderCases(); // Update list to remove dot
-                renderAdminChat();
-            }
-        }
-
-        function closeChatModal() {
-            const modal = document.getElementById('admin-chat-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-            currentChatCaseId = null;
-        }
-
-        function renderAdminChat() {
-            const container = document.getElementById('admin-chat-history');
-            if (!container) return;
-            
-            const messages = MockAPI.getChat();
-            messages.sort((a,b) => a.time - b.time);
-            const lang = localStorage.getItem('appLang') || 'ru';
-            const dict = translations[lang];
-            
-            let lastDateStr = '';
-            const now = new Date();
-            const yesterday = new Date();
-            yesterday.setDate(now.getDate() - 1);
-
-            container.innerHTML = messages.map(msg => {
-                const isMe = msg.from === 'admin'; // Specialist is admin
-                const isSystem = msg.from === 'system';
-                const date = new Date(msg.time);
-
-                // Группировка по датам
-                let dateHeader = '';
-                const currentDateStr = date.toDateString();
-                if (currentDateStr !== lastDateStr) {
-                    let label = date.toLocaleDateString(lang, { day: 'numeric', month: 'long' });
-                    if (currentDateStr === now.toDateString()) label = dict.date_today;
-                    else if (currentDateStr === yesterday.toDateString()) label = dict.date_yesterday;
-                    dateHeader = `<div class="flex justify-center my-6"><span class="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">${label}</span></div>`;
-                    lastDateStr = currentDateStr;
-                }
-                
-                if (isSystem) {
-                    return dateHeader + `
-                        <div class="flex justify-center my-4">
-                            <span class="bg-slate-100 text-slate-500 text-xs font-bold px-3 py-1 rounded-full border border-slate-200 uppercase tracking-wider">
-                                ${msg.text}
-                            </span>
-                        </div>`;
-                }
-                
-                return dateHeader + `
-                    <div class="flex ${isMe ? 'justify-end' : 'justify-start'} mb-4">
-                        <div class="max-w-[75%] p-4 rounded-2xl shadow-sm ${
-                            isMe 
-                            ? 'bg-blue-600 text-white rounded-tr-none' 
-                            : 'bg-white border border-slate-100 text-slate-800 rounded-tl-none'
-                        }">
-                            <div class="text-sm leading-relaxed font-medium">${msg.text}</div>
-                            <div class="text-[10px] mt-1 opacity-60 text-right font-bold">
-                                ${new Date(msg.time).toLocaleTimeString(lang, {hour:'2-digit', minute:'2-digit'})}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function sendAdminMessage() {
-            const input = document.getElementById('admin-chat-input');
-            if (!input) return;
-            const text = input.value.trim();
-            if (!text) return;
-            
-            MockAPI.addMessage({ from: 'admin', text: text });
-            input.value = '';
-            renderAdminChat();
-        }
-
-        // --- Notification Logic ---
-        function playNotification() {
-            const audio = document.getElementById('notification-sound');
-            if (audio) {
-                audio.muted = false;
-                audio.currentTime = 0;
-                audio.play().catch(e => console.error('Audio play failed:', e));
-            }
-        }
-
-        // Unlock audio on first interaction
-        function unlockAudio() {
-            const audio = document.getElementById('notification-sound');
-            if (audio) {
-                audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {});
-            }
-            document.removeEventListener('click', unlockAudio);
-        }
-        document.addEventListener('click', unlockAudio);
-
-        function requestAccountDeletion() {
-            const lang = localStorage.getItem('appLang') || 'ru';
-            const dict = translations[lang];
-            const confirmationMessage = dict.settings_delete_account_confirm || 'Are you sure you want to delete your account? This action is irreversible.';
-
-            if (confirm(confirmationMessage)) {
-                const user = MockAPI.getLoggedInUser();
-                if (user) {
-                    MockAPI.deleteUser(user.id);
-                    window.location.href = 'index.html';
+            // Если активирована вкладка расписания, инициализируем ее
+            if (targetId === 'tab-schedule') {
+                const dateInput = document.getElementById('schedule-date');
+                if (dateInput) {
+                    if (!dateInput.value) {
+                        dateInput.value = new Date().toISOString().split('T')[0];
+                    }
+                    renderSchedule(dateInput.value);
                 }
             }
         }
 
         function openAdminSettingsModal() {
             const modal = document.getElementById('admin-settings-modal');
-            if (modal) {
-                loadSpecialistProfile(); // Load fresh data before showing
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-                applyTranslations(); // Ensure new labels are translated
-            }
+            modal.classList.remove('hidden');
+            loadSpecialistProfile(); // Ensure profile data is fresh
+            modal.classList.add('flex');
+            const currentLang = localStorage.getItem('appLang') || 'ru';
+            document.querySelector(`input[name="lang"][value="${currentLang}"]`).checked = true;
+            const currentTheme = localStorage.getItem('appTheme') || 'light';
+            updateThemeButtons(currentTheme);
         }
 
         function closeAdminSettingsModal() {
             const modal = document.getElementById('admin-settings-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
 
-        // --- Settings Logic ---
-        function setTheme(theme) {
-            if (theme === 'dark') document.body.classList.add('dark-theme');
-            else document.body.classList.remove('dark-theme');
-            localStorage.setItem('appTheme', theme);
-
-            // Update button styles to show selection
-            const lightBtn = document.getElementById('admin-theme-btn-light');
-            const darkBtn = document.getElementById('admin-theme-btn-dark');
-
-            if (lightBtn && darkBtn) {
-                if (theme === 'dark') {
-                    darkBtn.classList.add('border-blue-500');
-                    lightBtn.classList.remove('border-blue-500');
-                } else {
-                    lightBtn.classList.add('border-blue-500');
-                    darkBtn.classList.remove('border-blue-500');
-                }
-            }
+        function loadSpecialistProfile() {
+            const user = MockAPI.getLoggedInUser();
+            if (!user || !user.profile) return;
+            document.getElementById('specialist-name').innerText = user.profile.fullName || 'Специалист';
+            document.getElementById('specialist-spec').innerText = user.profile.specializations?.[0] || '';
+            document.getElementById('profile-display-name').innerText = user.profile.fullName;
+            document.getElementById('profile-display-spec').innerText = user.profile.specializations?.join(', ');
+            document.getElementById('profile-display-bio').innerText = user.profile.bio || '';
+            document.getElementById('profile-display-welcome').innerText = user.profile.welcomeMessage ? `"${user.profile.welcomeMessage}"` : '';
+            const avatar = document.getElementById('specialist-avatar');
+            if (avatar) avatar.innerText = user.profile.fullName ? user.profile.fullName.charAt(0) : 'S';
         }
 
         function setLanguage(lang) {
             localStorage.setItem('appLang', lang);
             applyTranslations();
-            renderCases();
-            const dateInput = document.getElementById('schedule-date');
-            renderSchedule(dateInput ? dateInput.value : undefined);
         }
 
-        function applyTranslations() {
-            const lang = localStorage.getItem('appLang') || 'ru';
-            const dict = translations[lang];
-            if (!dict) return;
-
-            document.querySelectorAll('[data-translate-key]').forEach(el => {
-                const key = el.getAttribute('data-translate-key');
-                const translation = dict[key];
-                if (translation !== undefined) {
-                    if (el.matches('input[placeholder]')) {
-                        el.placeholder = translation;
-                    } else {
-                        el.innerText = translation;
-                    }
-                }
-            });
+        function setTheme(theme) {
+            localStorage.setItem('appTheme', theme);
+            document.body.classList.toggle('dark-theme', theme === 'dark');
+            updateThemeButtons(theme);
         }
 
-        // Init Theme
-        const savedTheme = localStorage.getItem('appTheme');
-        if (savedTheme) setTheme(savedTheme);
-        const savedLang = localStorage.getItem('appLang');
-        if (savedLang) { const r = document.querySelector(`input[name="admin-lang"][value="${savedLang}"]`); if(r) r.checked = true; applyTranslations(); }
+        function updateThemeButtons(theme) {
+            const lightBtn = document.getElementById('theme-btn-light');
+            const darkBtn = document.getElementById('theme-btn-dark');
+            if (!lightBtn || !darkBtn) return;
+            lightBtn.classList.remove('border-blue-600', 'border-2');
+            darkBtn.classList.remove('border-blue-600', 'border-2');
+            (theme === 'dark' ? darkBtn : lightBtn).classList.add('border-blue-600', 'border-2');
+        }
 
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'nlv_mock_v1') {
-                // If chat is open, update read time and refresh chat
-                const modal = document.getElementById('admin-chat-modal');
-                if (modal && !modal.classList.contains('hidden')) {
-                    adminLastReadTime = Date.now();
-                    localStorage.setItem('adminLastReadTime', adminLastReadTime);
-                    renderAdminChat();
-                }
-
-                renderCases(); // Refresh UI to show/hide red dot
-                
-                const oldVal = e.oldValue ? JSON.parse(e.oldValue) : null;
-                const newVal = e.newValue ? JSON.parse(e.newValue) : null;
-                if (oldVal && newVal && newVal.chat.length > oldVal.chat.length) {
-                    const last = newVal.chat[newVal.chat.length - 1];
-                    if (last.from === 'client') playNotification();
+        function handleAccountDeletion() {
+            if (confirm(translations[localStorage.getItem('appLang') || 'ru'].settings_delete_account_desc)) {
+                const user = MockAPI.getLoggedInUser();
+                if (user) {
+                    MockAPI.deleteUser(user.id);
+                    alert("Ваш аккаунт был удален.");
+                    window.location.href = 'index.html';
                 }
             }
-        });
+        }
 
+        function renderCases() {
+            const user = MockAPI.getLoggedInUser();
+            if (!user) return;
+            const cases = MockAPI.getCasesForSpecialist(user.id);
+            const casesListEl = document.getElementById('cases-list');
+            if (!casesListEl) return;
+
+            if (!cases || cases.length === 0) {
+                casesListEl.innerHTML = `<p class="text-slate-500">У вас пока нет активных кейсов.</p>`;
+                return;
+            }
+
+            const statusMap = { active: { text: 'Активен', color: 'bg-green-100 text-green-800' }, paused: { text: 'На паузе', color: 'bg-yellow-100 text-yellow-800' }, closing: { text: 'Завершается', color: 'bg-blue-100 text-blue-800' }, archived: { text: 'В архиве', color: 'bg-slate-100 text-slate-800' } };
+
+            casesListEl.innerHTML = cases.map(caseItem => `
+                <div class="activity-card flex justify-between items-center p-4" data-case-id="${caseItem.id}">
+                    <div class="flex-1">
+                        <h3 class="font-bold text-lg text-slate-800">${caseItem.clientName}</h3>
+                        <p class="text-sm text-slate-500">${caseItem.programName}</p>
+                        <p class="text-xs text-slate-400 mt-2">Последняя активность: ${new Date(caseItem.lastActivity).toLocaleDateString()}</p>
+                    </div>
+                    <div class="actions status-wrap">
+                        <button class="status-btn" data-action="toggle-status-menu"><span class="w-3 h-3 rounded-full ${statusMap[caseItem.status]?.color || ''}"></span><strong>${statusMap[caseItem.status]?.text || caseItem.status}</strong><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></button>
+                        <div class="status-menu hidden">${Object.keys(statusMap).map(s => `<a href="#" class="status-item" data-status="${s}">${statusMap[s].text}</a>`).join('')}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderSchedule(selectedDate) {
+            const user = MockAPI.getLoggedInUser();
+            if (!user) return;
+            const scheduleListEl = document.getElementById('schedule-list');
+            if (!scheduleListEl) return;
+
+            const allAppointments = MockAPI.getScheduleForSpecialist(user.id);
+            const appointmentsForDate = allAppointments.filter(appt => appt.date === selectedDate);
+
+            if (appointmentsForDate.length === 0) {
+                scheduleListEl.innerHTML = `<p class="text-slate-500">На эту дату нет запланированных сессий.</p>`;
+                return;
+            }
+
+            scheduleListEl.innerHTML = appointmentsForDate.sort((a, b) => a.time.localeCompare(b.time)).map(appt => `
+                <div class="activity-card flex justify-between items-center p-4">
+                    <div class="flex items-center gap-4">
+                        <div class="text-lg font-bold text-slate-700">${appt.time}</div>
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-800">${appt.clientName}</h3>
+                            <p class="text-sm text-slate-500">${appt.type} (${appt.duration} мин)</p>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-bold text-sm">Подключиться</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- 3. Инициализация ---
         document.addEventListener('DOMContentLoaded', () => {
-            loadSpecialistProfile();
-            renderCases();
-            
-            // Делегирование событий для списка кейсов (вместо inline onclick)
-            const casesList = document.getElementById('cases-list');
-            if (casesList) {
-                casesList.addEventListener('click', (e) => {
-                    const btn = e.target.closest('[data-action="assign-meeting"]');
-                    if (btn) assignMeeting(btn.dataset.id, btn.dataset.title);
-                });
+            MockAPI.init();
+            const user = MockAPI.getLoggedInUser();
+
+            // Guard: Всегда проверяем пользователя и роль в первую очередь.
+            if (!user || user.role !== 'admin') {
+                window.location.href = 'index.html';
+                return;
             }
 
-            const dateInput = document.getElementById('schedule-date');
-            if (dateInput) {
-                const today = new Date().toISOString().substr(0,10);
-                dateInput.value = today;
-                dateInput.addEventListener('change', ()=> renderSchedule(dateInput.value));
-                renderSchedule(dateInput.value);
-            } else {
-                renderSchedule();
-            }
-
-            // Sidebar calendar link should open schedule tab and focus date
-            const sideCal = document.getElementById('sidebar-calendar');
-            if (sideCal) {
-                sideCal.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-                    const schedTab = document.querySelector('.nav-tab[data-target="tab-schedule"]');
-                    if (schedTab) schedTab.classList.add('active');
-                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-                    const pane = document.getElementById('tab-schedule');
-                    if (pane) pane.classList.add('active');
-                    const dateInput = document.getElementById('schedule-date');
-                    if (dateInput) {
-                        const today = new Date().toISOString().substr(0,10);
-                        dateInput.value = today;
-                        dateInput.focus();
-                        renderSchedule(dateInput.value);
-                    }
-                });
-            }
-
-            // Tab switching
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-                    const target = tab.getAttribute('data-target');
-                    if (!target) return; // If it's a button like settings, do nothing here.
-                    tab.classList.add('active');
-                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-                    const pane = document.getElementById(target);
-                    if (pane) pane.classList.add('active');
-                });
+            // --- Шаг 1: Привязка всех обработчиков событий ---
+            document.querySelector('.nav-tabs-container').addEventListener('click', (e) => {
+                const tab = e.target.closest('.nav-tab');
+                if (!tab) return;
+                if (tab.dataset.action === 'open-settings') openAdminSettingsModal();
+                else if (tab.dataset.target) switchTab(tab.dataset.target);
             });
+
+            document.getElementById('sidebar-calendar')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchTab('tab-schedule');
+            });
+
+            const scheduleDateInput = document.getElementById('schedule-date');
+            if (scheduleDateInput) {
+                scheduleDateInput.addEventListener('change', () => renderSchedule(scheduleDateInput.value));
+            }
+
+            document.getElementById('cases-list').addEventListener('click', function(e) {
+                const toggleBtn = e.target.closest('[data-action="toggle-status-menu"]');
+                const statusItem = e.target.closest('.status-item');
+
+                document.querySelectorAll('.status-menu').forEach(menu => {
+                    if (!toggleBtn || !menu.isSameNode(toggleBtn.nextElementSibling)) menu.classList.add('hidden');
+                });
+
+                if (toggleBtn) {
+                    e.preventDefault();
+                    toggleBtn.nextElementSibling.classList.toggle('hidden');
+                }
+
+                if (statusItem) {
+                    e.preventDefault();
+                    MockAPI.updateCase(statusItem.closest('.activity-card').dataset.caseId, { status: statusItem.dataset.status });
+                    renderCases();
+                }
+            });
+
+            // --- Шаг 2: Применение универсальных настроек UI ---
+            applyTranslations();
+            const savedTheme = localStorage.getItem('appTheme') || 'light';
+            setTheme(savedTheme);
+            const sessionDisplay = document.getElementById('session-id-display');
+            if (user.activeSessions?.length > 0) {
+                sessionDisplay.innerText = `SID: ${user.activeSessions[user.activeSessions.length - 1].sessionId}`;
+            }
+
+            // --- Шаг 3: Условный рендеринг (Мастер настройки или Панель управления) ---
+            if (user.profile && user.profile.onboardingComplete === false) {
+                showOnboardingWizard();
+            } else {
+                // The user is fully onboarded, load the main interface.
+                loadSpecialistProfile();
+                renderCases();
+                switchTab('tab-dashboard');
+            }
         });
     </script>
-
-    <!-- Модальное окно назначения встречи -->
-    <div id="meeting-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[200] hidden items-center justify-center transition-opacity">
-        <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl transform transition-all scale-100">
-            <h3 class="text-2xl font-black mb-2" data-translate-key="meeting_modal_title">Новая встреча</h3>
-            <p id="meeting-case-title" class="text-slate-500 mb-6 text-sm"></p>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" data-translate-key="meeting_modal_datetime">Дата и время</label>
-                    <input type="datetime-local" id="meeting-datetime" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-blue-500 outline-none font-bold text-slate-700">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" data-translate-key="meeting_modal_topic">Тема встречи</label>
-                    <input type="text" id="meeting-topic" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-blue-500 outline-none font-bold text-slate-700" placeholder="Например: Core Session" data-translate-key="meeting_modal_topic_placeholder">
-                </div>
-            </div>
-
-            <div class="flex gap-3 mt-8">
-                <button onclick="closeMeetingModal()" class="flex-1 py-3 rounded-xl font-bold text-slate-400 hover:bg-slate-50 transition" data-translate-key="meeting_modal_cancel">Отмена</button>
-                <button onclick="confirmMeeting()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition" data-translate-key="meeting_modal_assign">Назначить</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Chat Modal -->
-    <div id="admin-chat-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[200] hidden items-center justify-center transition-opacity">
-        <div class="bg-white rounded-3xl w-full max-w-2xl h-[80vh] shadow-2xl flex flex-col overflow-hidden">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <div>
-                    <h3 class="text-xl font-black" data-translate-key="chat_modal_title">Чат с клиентом</h3>
-                    <p id="chat-client-name" class="text-slate-500 text-sm">Александр</p>
-                </div>
-                <button onclick="closeChatModal()" class="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-red-500 transition">✕</button>
-            </div>
-            
-            <div id="admin-chat-history" class="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/50">
-                <!-- Messages -->
-            </div>
-
-            <div class="p-4 bg-white border-t border-slate-100 flex gap-3 items-center">
-                <input type="text" id="admin-chat-input" class="flex-1 px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:border-blue-500 outline-none font-medium transition-all" placeholder="Напишите сообщение..." onkeydown="if(event.key==='Enter') sendAdminMessage()" data-translate-key="chat_modal_placeholder">
-                <button onclick="sendAdminMessage()" class="bg-blue-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center hover:bg-blue-700 transition shadow-lg shadow-blue-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 ml-1">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notification Sound -->
-    <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
-
-    <!-- Модальное окно Настроек -->
-    <div id="admin-settings-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[200] hidden items-center justify-center p-4 transition-opacity">
-        <div class="bg-white rounded-3xl p-8 w-full max-w-4xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button onclick="closeAdminSettingsModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:text-red-500 transition">✕</button>
-            
-            <h2 class="section-title mb-6" data-translate-key="settings_title">Настройки страницы</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- My Profile Section -->
-                <div class="p-8 rounded-3xl border border-slate-200 shadow-sm md:col-span-2">
-                    <h3 class="text-xl font-bold mb-6" data-translate-key="settings_profile_title">Мой профиль</h3>
-                    <div class="space-y-4 text-sm">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider" data-translate-key="settings_profile_name">Полное имя</label>
-                            <p id="profile-display-name" class="font-medium text-slate-700 mt-1 text-base"></p>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider" data-translate-key="settings_profile_spec">Специализация</label>
-                            <p id="profile-display-spec" class="font-medium text-slate-700 mt-1 text-base"></p>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider" data-translate-key="settings_profile_bio">Биография</label>
-                            <p id="profile-display-bio" class="font-medium text-slate-700 mt-1 text-base whitespace-pre-wrap"></p>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider" data-translate-key="settings_profile_welcome">Приветственное сообщение</label>
-                            <p id="profile-display-welcome" class="font-medium text-slate-700 mt-1 text-base whitespace-pre-wrap"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-8 rounded-3xl border border-slate-200 shadow-sm">
-                    <h3 class="text-xl font-bold mb-6" data-translate-key="settings_appearance">Внешний вид</h3>
-                    <div class="flex gap-4">
-                        <button id="admin-theme-btn-light" onclick="setTheme('light')" class="flex-1 py-4 border-2 border-slate-100 rounded-2xl font-bold hover:border-blue-500 focus:border-blue-600 transition flex flex-col items-center gap-2">
-                            <span class="text-2xl">☀️</span> <span data-translate-key="settings_theme_light">Светлая</span>
-                        </button>
-                        <button id="admin-theme-btn-dark" onclick="setTheme('dark')" class="flex-1 py-4 border-2 border-slate-100 rounded-2xl font-bold hover:border-blue-500 focus:border-blue-600 transition flex flex-col items-center gap-2">
-                            <span class="text-2xl">🌙</span> <span data-translate-key="settings_theme_dark">Темная</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="p-8 rounded-3xl border border-slate-200 shadow-sm">
-                    <h3 class="text-xl font-bold mb-6" data-translate-key="settings_language">Язык системы</h3>
-                    <div class="space-y-4">
-                        <label class="flex items-center gap-4 p-4 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
-                            <input type="radio" name="admin-lang" value="ru" onchange="setLanguage('ru')" checked class="w-5 h-5 text-blue-600">
-                            <span class="font-bold" data-translate-key="lang_ru">Русский</span>
-                        </label>
-                        <label class="flex items-center gap-4 p-4 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
-                            <input type="radio" name="admin-lang" value="ua" onchange="setLanguage('ua')" class="w-5 h-5 text-blue-600">
-                            <span class="font-bold" data-translate-key="lang_ua">Українська</span>
-                        </label>
-                        <label class="flex items-center gap-4 p-4 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition">
-                            <input type="radio" name="admin-lang" value="en" onchange="setLanguage('en')" class="w-5 h-5 text-blue-600">
-                            <span class="font-bold" data-translate-key="lang_en">English</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Danger Zone -->
-                <div class="mt-8 bg-red-50 p-8 rounded-3xl border border-red-200">
-                    <h3 class="text-xl font-bold mb-2 text-red-800" data-translate-key="settings_delete_account_title">Удаление аккаунта</h3>
-                    <p class="text-red-600 mb-6" data-translate-key="settings_delete_account_desc">Это действие необратимо. Все ваши данные будут удалены.</p>
-                    <button onclick="requestAccountDeletion()" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-red-700 transition" data-translate-key="settings_delete_account_btn">Удалить аккаунт</button>
-                </div>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
