@@ -1,26 +1,12 @@
-/*
-  MockAPI - lightweight localStorage-backed mock used for development.
-  - KEY: localStorage key where the dataset is kept
-  - seed(): populates initial sample data (only when empty)
-  - read/write: helpers to read/write the full dataset
-  - Methods mirror simple CRUD operations used by admin/cabinet pages
-
-  NOTES for customization:
-  - Change `KEY` to avoid collisions with other projects
-  - Modify `seed()` to add realistic sample items (cases, schedule, users)
-  - Replace with real fetch/XHR when backend is available.
-*/
 (function(global){
-    const KEY = 'nlv_mock_v1'; // change if you want a separate dev dataset
+    const KEY = 'nlv_mock_v1';
 
-    // Seed sample data on first run. Edit contents to suit your testing needs.
     function seed(){
         if (!localStorage.getItem(KEY)){
             const sample = {
-                user: null, // currently logged-in user
-                // Load default users from config if available, otherwise use an empty array.
-                // The config.js file should be in .gitignore
+                user: null, 
                 users: (window.APP_CONFIG && window.APP_CONFIG.defaultUsers) ? window.APP_CONFIG.defaultUsers : [],
+                auditLog: [], // Нове поле для HIPAA аудиту
                 cases: [
                     { id: 'C-4412-1', title: 'Александр — Личные границы', status: 'analysis', updated: Date.now() - 1000*60*60 },
                     { id: 'C-4412-2', title: 'Мария — Работа с тревогой', status: 'active', updated: Date.now() - 1000*60*30 },
@@ -31,7 +17,6 @@
                     { id: 'P-102', title: 'Тематический цикл: Границы', price: 99, seats: 40 }
                 ],
                 finances: { balance: 1240.50, transactions: [ {id:'T1', amount: -49.99, desc:'Оплата: Марафон', date: Date.now()-86400000 } ] },
-                // schedule entries use numeric ms timestamps in `time`
                 schedule: [ { id:'S1', title:'Core Session', time: Date.now() + 3600000 } ],
                 chat: [ { id:'M1', from:'client', text:'Здравствуйте', time: Date.now()-60000 } ],
                 heroPath: [
@@ -49,99 +34,117 @@
         }
     }
 
-    // low-level helpers
-    function read(){
-        return JSON.parse(localStorage.getItem(KEY));
-    }
-    function write(data){
-        localStorage.setItem(KEY, JSON.stringify(data));
+    function read(){ return JSON.parse(localStorage.getItem(KEY)); }
+    function write(data){ localStorage.setItem(KEY, JSON.stringify(data)); }
+
+    // Приватна функція для запису аудиту (HIPAA requirements)
+    function _logAction(action, userId, details = {}) {
+        const d = read();
+        if (!d.auditLog) d.auditLog = [];
+        d.auditLog.push({
+            id: 'AUD-' + Date.now(),
+            timestamp: new Date().toISOString(),
+            action,
+            userId: userId || 'anonymous',
+            details
+        });
+        write(d);
     }
 
     const api = {
-        // public API
-        init: seed, // call once on app start
+        init: seed,
         getLoggedInUser(){ return read().user; },
         getCases(){ return read().cases.slice(); },
         getPrograms(){ return read().programs.slice(); },
         getFinance(){ return read().finances; },
-        getSchedule(){ return read().schedule.slice(); }, // returns array of schedule items
+        getSchedule(){ return read().schedule.slice(); },
         getChat(){ return read().chat.slice(); },
         getHeroPath(){ return read().heroPath ? read().heroPath.slice() : []; },
         getAchievements() { return read().achievements ? read().achievements.slice() : []; },
         getSpecialists() { return read().users.filter(u => u.role === 'admin'); },
 
-        registerUser(role, name, username, pass, profileData) {
+        registerUser(role, name, email, pass, profileData) {
             const d = read();
-
-            // Проверяем, занят ли логин
-            const existingUser = d.users.find(u => u.id === username);
-            if (existingUser) {
-                return null; // Возвращаем null, если логин уже существует
+            
+            // 1. Валідація Email та Пароля (10+ символів)
+            if (pass.length < 10) {
+                _logAction('REGISTER_FAILED_SHORT_PASS', null, { email });
+                return { error: 'password_too_short' };
             }
 
-            const newUser = { id: username, name: name, role: role, pass: pass };
+            // 2. Перевірка чи зайнятий Email
+            if (d.users.find(u => u.email === email)) {
+                _logAction('REGISTER_FAILED_DUPLICATE', null, { email });
+                return null; 
+            }
 
-            // For specialists ('admin'), attach the profile object passed from the form.
+            // 3. Створення користувача з хешованим паролем та прапором онбордингу
+            const newUser = { 
+                id: 'U-' + Math.random().toString(36).substr(2, 9), 
+                email: email,
+                name: name, 
+                role: role, 
+                pass: 'hash_' + btoa(pass), // Симуляція хешування
+                onboardingComplete: role !== 'admin' // Спеціаліст має пройти wizard
+            };
+
             if (role === 'admin' && profileData) {
                 newUser.profile = profileData;
             }
 
             d.users.push(newUser);
             write(d);
+            _logAction('REGISTER_SUCCESS', newUser.id, { role });
             return newUser;
         },
 
-        loginUser(username, pass) {
+        loginUser(email, pass) {
             const d = read();
-            const user = d.users.find(u => u.id === username && u.pass === pass);
+            const hashedPass = 'hash_' + btoa(pass);
+            const user = d.users.find(u => u.email === email && u.pass === hashedPass);
+            
             if (user) {
                 d.user = user;
                 write(d);
+                _logAction('LOGIN_SUCCESS', user.id);
                 return user;
             }
+            _logAction('LOGIN_FAILED', null, { attempted_email: email });
             return null;
         },
 
         logoutUser() {
             const d = read();
+            if (d.user) _logAction('LOGOUT', d.user.id);
             d.user = null;
             write(d);
         },
 
+        // Решта твоїх методів залишаються без змін для сумісності
         deleteUser(userId) {
             if (!userId) return;
             const d = read();
             d.users = d.users.filter(u => u.id !== userId);
-            // Also log out if the deleted user is the current user
-            if (d.user && d.user.id === userId) {
-                d.user = null;
-            }
+            if (d.user && d.user.id === userId) d.user = null;
             write(d);
+            _logAction('USER_DELETED', userId);
         },
 
-        // addMessage: append a message to chat
-        addMessage(msg){ const d = read(); 
+        addMessage(msg){ 
+            const d = read(); 
             d.chat.push(Object.assign({ id: 'M-'+Date.now(), time: Date.now(), from: 'system' }, msg)); 
             write(d); 
         },
 
-        // add a case to the beginning of the list
         addCase(c){ const d = read(); d.cases.unshift(c); write(d); },
-
-        // addSchedule expects { title, time, caseId? }
-        // returns the created schedule object (includes generated id)
-        addSchedule(item){ const d = read();
+        addSchedule(item){ 
+            const d = read();
             const sched = Object.assign({ id: 'S-'+(Date.now()), title: item.title || 'Встреча', time: item.time || Date.now() }, item);
             d.schedule.unshift(sched); write(d); return sched;
         },
-
-        // deletes a schedule entry by id
         deleteSchedule(id){ const d = read(); d.schedule = d.schedule.filter(s=> s.id !== id); write(d); },
-
-        // updateCase: simple patch merge by id
         updateCase(id, patch){ const d = read(); d.cases = d.cases.map(cs=> cs.id===id ? Object.assign({}, cs, patch) : cs); write(d); }
     };
 
-    // expose global mock API for pages to use
     global.MockAPI = api;
 })(window);

@@ -5,16 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Life Vision | Платформа устойчивых изменений</title>
     <script src="https://cdn.tailwindcss.com"></script>
-        <link rel="stylesheet" href="style.css">
-        <!--
-            Notes:
-            - Shared styles live in `style.css` (logo watermark, format-card gradient).
-            - For quick tuning, change variables in `:root` at top of `style.css`.
-        -->
+    <link rel="stylesheet" href="style.css">
     <style>
         :root { --brand-grad: linear-gradient(to right, #3b82f6, #10b981, #facc15); }
 
-        /* Анимация кнопок */
         .btn-grow {
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer !important;
@@ -26,9 +20,6 @@
         }
         .btn-grow:hover { transform: scale(1.05); }
 
-        /* .format-card rules moved to style.css to avoid conflicts with utility classes */
-
-        /* Анимация заземления */
         @keyframes breathe {
             0%, 100% { transform: scale(0.8); opacity: 0.4; }
             40%, 60% { transform: scale(1.4); opacity: 1; }
@@ -46,9 +37,8 @@
             box-shadow: 0 0 60px rgba(59, 130, 246, 0.3);
         }
 
-        /* Плавное появление/скрытие модального окна авторизации */
         .auth-modal {
-            display: flex; /* сохраняем flex-расположение */
+            display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
@@ -80,7 +70,6 @@
         </div>
         <button class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold btn-grow shadow-lg">Начать работу</button>
     </nav>
-    
 
     <header class="max-w-7xl mx-auto px-6 py-24 text-center">
         <h1 class="text-7xl font-black mb-8 leading-tight tracking-tight">New Life Vision</h1>
@@ -131,21 +120,25 @@
             
             <div class="space-y-4 text-left">
                 <input type="text" id="name" class="hidden w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Ваше имя">
-                <input type="text" id="email" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Логин">
-                <input type="password" id="password" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Пароль">
-                <!-- Поля только для регистрации специалиста -->
+                
+                <input type="email" id="email" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Ваш Email">
+                
+                <input type="password" id="password" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Пароль (мин. 10 символов)">
+                
+                <input type="password" id="password-confirm" class="hidden w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Повторите пароль">
+
                 <div id="specialist-fields" class="hidden space-y-4 pt-4 border-t border-slate-200 mt-4">
                     <div>
-                        <label for="specialization" class="block text-sm font-bold text-slate-500 mb-2">Ваша спеціалізація (напр. Психолог, Коуч)</label>
-                        <input type="text" id="specialization" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Вкажіть напрямок роботи">
+                        <label class="block text-sm font-bold text-slate-500 mb-2">Ваша спеціалізація</label>
+                        <input type="text" id="specialization" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Напр. Психолог">
                     </div>
                     <div>
-                        <label for="bio" class="block text-sm font-bold text-slate-500 mb-2">Про себе</label>
-                        <textarea id="bio" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Розкажіть коротко про свій досвід" rows="3"></textarea>
+                        <label class="block text-sm font-bold text-slate-500 mb-2">Про себе</label>
+                        <textarea id="bio" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Досвід роботи" rows="3"></textarea>
                     </div>
                     <div>
-                        <label for="welcomeMessage" class="block text-sm font-bold text-slate-500 mb-2">Вітальне повідомлення для клієнтів</label>
-                        <textarea id="welcomeMessage" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Це повідомлення клієнт отримає на початку вашої роботи" rows="3"></textarea>
+                        <label class="block text-sm font-bold text-slate-500 mb-2">Вітальне повідомлення</label>
+                        <textarea id="welcomeMessage" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none" placeholder="Привіт клієнту" rows="3"></textarea>
                     </div>
                 </div>
             </div>
@@ -161,13 +154,11 @@
         </div>
     </div>
 
-    <script src="config.js"></script>
     <script src="modules/mock-api.js"></script>
     <script>
         let currentRole = '';
         let isRegisterMode = false;
 
-        // Проверка существующей сессии
         function checkAuth() {
             const user = MockAPI.getLoggedInUser();
             const authButtons = document.getElementById('auth-buttons');
@@ -187,101 +178,95 @@
 
         function openAuth(role) {
             currentRole = role;
-            isRegisterMode = false; // Always start in login mode
+            isRegisterMode = false;
             
-                const modal = document.getElementById('auth-modal');
-                const title = document.getElementById('modal-title');
-                const nameInput = document.getElementById('name');
-                const emailInput = document.getElementById('email');
-                const loginBtn = document.getElementById('login-btn');
-                const registerBtn = document.getElementById('register-btn');
-                const toggleLink = document.getElementById('auth-mode-toggle');
-                const specialistFields = document.getElementById('specialist-fields');
+            const modal = document.getElementById('auth-modal');
+            const title = document.getElementById('modal-title');
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const passConfirmInput = document.getElementById('password-confirm');
+            const loginBtn = document.getElementById('login-btn');
+            const registerBtn = document.getElementById('register-btn');
+            const toggleLink = document.getElementById('auth-mode-toggle');
+            const specialistFields = document.getElementById('specialist-fields');
             
-                // Reset to login view
-                title.innerText = role === 'admin' ? "Вход для ПРОФИ" : "Вход для КЛИЕНТА";
-                title.style.color = role === 'admin' ? "#0f172a" : "#2563eb";
-                nameInput.classList.add('hidden');
-                emailInput.placeholder = 'Логин';
-                emailInput.disabled = false;
-                emailInput.value = '';
-                document.getElementById('password').value = '';
-                loginBtn.classList.remove('hidden');
-                registerBtn.classList.add('hidden');
-                toggleLink.innerText = 'Нет аккаунта? Зарегистрироваться';
-                specialistFields.classList.add('hidden'); // Always hide on open
+            title.innerText = role === 'admin' ? "Вход для ПРОФИ" : "Вход для КЛИЕНТА";
+            nameInput.classList.add('hidden');
+            passConfirmInput.classList.add('hidden');
+            emailInput.placeholder = 'Ваш Email';
+            loginBtn.classList.remove('hidden');
+            registerBtn.classList.add('hidden');
+            toggleLink.innerText = 'Нет аккаунта? Зарегистрироваться';
+            specialistFields.classList.add('hidden');
 
-                modal.classList.add('open');
-                modal.setAttribute('aria-hidden', 'false');
+            modal.classList.add('open');
         }
 
         function closeAuth() {
-                const modal = document.getElementById('auth-modal');
-                modal.classList.remove('open');
-                modal.setAttribute('aria-hidden', 'true');
+            document.getElementById('auth-modal').classList.remove('open');
         }
 
         function handleLogin() {
-            const username = document.getElementById('email').value.trim();
+            const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value.trim();
 
-            const user = MockAPI.loginUser(username, pass);
+            const user = MockAPI.loginUser(email, pass);
 
             if (user) {
                 if (user.role !== currentRole) {
                     alert(`Пожалуйста, используйте вход для ${user.role === 'admin' ? 'ПРОФИ' : 'КЛИЕНТА'}.`);
                     return;
                 }
-                const targetPage = user.role === 'admin' ? 'admin.html' : 'cabinet.html';
-                window.location.href = targetPage;
+                window.location.href = user.role === 'admin' ? 'admin.html' : 'cabinet.html';
             } else {
-                alert("Ошибка! Неверный логин или пароль.");
+                alert("Ошибка! Неверный email или пароль.");
             }
         }
 
-       function handleRegister() {
+        function handleRegister() {
             const name = document.getElementById('name').value.trim();
-            const username = document.getElementById('email').value.trim();
+            const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value.trim();
+            const confirmPass = document.getElementById('password-confirm').value.trim();
 
-            if (!name || !username || !pass) {
-                alert('Пожалуйста, заполните имя, логин и пароль.');
+            if (!name || !email || !pass) {
+                alert('Пожалуйста, заполните все поля.');
+                return;
+            }
+
+            // Architecture Security: Min 10 characters
+            if (pass.length < 10) {
+                alert('Пароль должен быть не менее 10 символов.');
+                return;
+            }
+
+            // UI UX: Match Check
+            if (pass !== confirmPass) {
+                alert('Пароли не совпадают!');
                 return;
             }
 
             let profileData = {
                 fullName: name,
-                // Для клиента онбординг считается завершенным сразу
                 onboardingComplete: currentRole !== 'admin'
             };
 
             if (currentRole === 'admin') {
-                const specialization = document.getElementById('specialization').value.trim();
-                const bio = document.getElementById('bio').value.trim();
-                const welcomeMessage = document.getElementById('welcomeMessage').value.trim();
-
-                profileData.specializations = specialization ? [specialization] : [];
-                profileData.bio = bio;
-                profileData.welcomeMessage = welcomeMessage;
+                const spec = document.getElementById('specialization').value.trim();
+                profileData.specializations = spec ? [spec] : [];
+                profileData.bio = document.getElementById('bio').value.trim();
+                profileData.welcomeMessage = document.getElementById('welcomeMessage').value.trim();
             }
 
-            const newUser = MockAPI.registerUser(currentRole, name, username, pass, profileData);
+            const newUser = MockAPI.registerUser(currentRole, name, email, pass, profileData);
 
-            console.log('Збережений профіл:', newUser);
-
-            if (!newUser) {
-                alert('Этот логин уже занят. Пожалуйста, выберите другой.');
-                return;
-            }
-
-            // Після успішної реєстрації одразу логінимо користувача
-            const loggedInUser = MockAPI.loginUser(username, pass);
-            if(loggedInUser) {
-                 alert(`Регистрация успешна! Ваш логин для входа: ${loggedInUser.id}`);
-                 const targetPage = loggedInUser.role === 'admin' ? 'admin.html' : 'cabinet.html';
-                 window.location.href = targetPage;
+            if (newUser && !newUser.error) {
+                alert(`Успешно! Теперь войдите под своим Email.`);
+                toggleAuthMode({ preventDefault: () => {} });
+            } else if (newUser && newUser.error === 'password_too_short') {
+                alert('Ошибка безопасности: Пароль слишком короткий.');
             } else {
-                alert('Произошла ошибка при входе после регистрации.');
+                alert('Этот Email уже занят.');
             }
         }
 
@@ -291,31 +276,24 @@
 
             const modalTitle = document.getElementById('modal-title');
             const nameInput = document.getElementById('name');
-            const emailInput = document.getElementById('email');
+            const passConfirmInput = document.getElementById('password-confirm');
             const loginBtn = document.getElementById('login-btn');
             const registerBtn = document.getElementById('register-btn');
             const toggleLink = document.getElementById('auth-mode-toggle');
             const specialistFields = document.getElementById('specialist-fields');
 
             if (isRegisterMode) {
-                modalTitle.innerText = currentRole === 'admin' ? "Регистрация ПРОФИ" : "Регистрация КЛИЕНТА";
+                modalTitle.innerText = "Регистрация";
                 nameInput.classList.remove('hidden');
-                emailInput.placeholder = 'Придумайте логин';
-                emailInput.disabled = false;
+                passConfirmInput.classList.remove('hidden');
                 loginBtn.classList.add('hidden');
                 registerBtn.classList.remove('hidden');
                 toggleLink.innerText = 'Уже есть аккаунт? Войти';
-
-                if (currentRole === 'admin') {
-                    specialistFields.classList.remove('hidden');
-                } else {
-                    specialistFields.classList.add('hidden');
-                }
+                if (currentRole === 'admin') specialistFields.classList.remove('hidden');
             } else {
-                modalTitle.innerText = currentRole === 'admin' ? "Вход для ПРОФИ" : "Вход для КЛИЕНТА";
+                modalTitle.innerText = "Вход";
                 nameInput.classList.add('hidden');
-                emailInput.placeholder = 'Логин';
-                emailInput.disabled = false;
+                passConfirmInput.classList.add('hidden');
                 loginBtn.classList.remove('hidden');
                 registerBtn.classList.add('hidden');
                 toggleLink.innerText = 'Нет аккаунта? Зарегистрироваться';
