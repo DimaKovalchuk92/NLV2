@@ -12,12 +12,12 @@
                         name: 'Dr. Anna',
                         role: 'admin',
                         pass: 'hash_' + btoa('password123'),
-                        onboardingComplete: true,
                         profile: {
                             fullName: 'Анна Сергеевна',
                             specializations: ['Клинический психолог', 'Гештальт-терапевт'],
                             bio: 'Опытный психолог, специализируюсь на работе с тревогой и личностным ростом. Моя цель — помочь вам найти внутренние ресурсы для преодоления трудностей.',
-                            welcomeMessage: 'Добро пожаловать! Я рада начать наш совместный путь к вашему благополучию.'
+                            welcomeMessage: 'Добро пожаловать! Я рада начать наш совместный путь к вашему благополучию.',
+                            onboardingComplete: true
                         },
                         activeSessions: [{ sessionId: 'SESS-admin-init', lastActive: new Date().toISOString() }],
                     }

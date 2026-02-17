@@ -181,6 +181,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const avatar = document.querySelector('.avatar');
     if (avatar) avatar.innerText = user.name ? user.name.charAt(0).toUpperCase() : 'К';
 
+    const sessionDisplay = document.getElementById('session-id-display');
+    if (sessionDisplay && user.activeSessions?.length > 0) {
+        // Отображаем ID последней активной сессии
+        sessionDisplay.innerText = `SID: ${user.activeSessions[user.activeSessions.length - 1].sessionId}`;
+    }
+
     // 3. Инициализируем контент страницы
     initDashboard();
     updateNavIndicators();

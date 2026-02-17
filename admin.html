@@ -32,10 +32,11 @@
             <a href="#" class="sidebar-link">🧩 <span data-translate-key="nav_methodology">Методология</span></a>
             <a href="index.html" class="sidebar-link">🏠 <span data-translate-key="nav_exit">Выйти</span></a>
         </nav>
-        <div class="mt-auto pt-10">
+        <div class="mt-auto pt-10 px-4">
             <span class="px-3 py-1 bg-slate-900 text-white text-[10px] font-bold rounded-md uppercase tracking-widest" data-translate-key="role_specialist">
                 Специалист
             </span>
+            <div id="session-id-display" class="mt-4 text-[10px] text-slate-400 uppercase tracking-widest"></div>
         </div>
     </aside>
 
@@ -43,12 +44,11 @@
         <header class="header-main relative">
             <div class="user-greeting">
                 <div>
-                    <h1 id="specialist-name" class="text-3xl font-bold">Панель Специалиста</h1>
+                    <h1 id="specialist-name" class="text-3xl font-bold"></h1>
                     <p id="specialist-spec" class="text-slate-500 font-medium"></p>
                 </div>
                 <div id="specialist-avatar" class="avatar shadow-lg bg-slate-900 text-white flex items-center justify-center text-xl font-bold rounded-full w-12 h-12">S</div>
             </div>
-            <div id="session-id-display" class="absolute top-4 right-6 text-[10px] text-slate-400 uppercase tracking-widest"></div>
         </header>
 
         <nav class="nav-tabs-container flex gap-6 border-b border-slate-200 mb-8 px-8" role="tablist">
@@ -220,15 +220,21 @@
 
         function loadSpecialistProfile() {
             const user = MockAPI.getLoggedInUser();
-            if (!user || !user.profile) return;
-            document.getElementById('specialist-name').innerText = user.profile.fullName || 'Специалист';
-            document.getElementById('specialist-spec').innerText = user.profile.specializations?.[0] || '';
-            document.getElementById('profile-display-name').innerText = user.profile.fullName;
-            document.getElementById('profile-display-spec').innerText = user.profile.specializations?.join(', ');
-            document.getElementById('profile-display-bio').innerText = user.profile.bio || '';
-            document.getElementById('profile-display-welcome').innerText = user.profile.welcomeMessage ? `"${user.profile.welcomeMessage}"` : '';
+            if (!user || !user.profile) return; // Guard clause
+
+            const { fullName, specializations, bio, welcomeMessage } = user.profile;
+
+            // AC1 & AC2: Update header with specialist's name and primary specialization
+            document.getElementById('specialist-name').innerText = fullName || 'Специалист';
+            document.getElementById('specialist-spec').innerText = specializations?.[0] || 'Специализация не указана';
+            
+            // AC3: Populate the "My Profile" section in the settings modal
+            document.getElementById('profile-display-name').innerText = fullName || 'Имя не указано';
+            document.getElementById('profile-display-spec').innerText = specializations?.join(', ') || 'Специализации не указаны';
+            document.getElementById('profile-display-bio').innerText = bio || 'Биография не заполнена.';
+            document.getElementById('profile-display-welcome').innerText = welcomeMessage ? `"${welcomeMessage}"` : 'Приветственное сообщение не установлено.';
             const avatar = document.getElementById('specialist-avatar');
-            if (avatar) avatar.innerText = user.profile.fullName ? user.profile.fullName.charAt(0) : 'S';
+            if (avatar) avatar.innerText = fullName ? fullName.charAt(0).toUpperCase() : 'S';
         }
 
         function setLanguage(lang) {
@@ -379,15 +385,12 @@
                 sessionDisplay.innerText = `SID: ${user.activeSessions[user.activeSessions.length - 1].sessionId}`;
             }
 
-            // --- Шаг 3: Условный рендеринг (Мастер настройки или Панель управления) ---
-            if (user.profile && user.profile.onboardingComplete === false) {
-                showOnboardingWizard();
-            } else {
-                // The user is fully onboarded, load the main interface.
-                loadSpecialistProfile();
-                renderCases();
-                switchTab('tab-dashboard');
-            }
+            // --- Шаг 3: Загрузка основного интерфейса ---
+            // Логика онбординга теперь полностью в index.html.
+            // Эта страница предполагает, что пользователь уже прошел онбординг.
+            loadSpecialistProfile();
+            renderCases();
+            switchTab('tab-dashboard');
         });
     </script>
 </body>
